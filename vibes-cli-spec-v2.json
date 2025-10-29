@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  "spec_type": "product_update",
+  "metadata": {
+    "name": "vibes-cli",
+    "description": "A CLI tool to convert raw human requirements into AI-consumable structured specifications.",
+    "author": "AI + Human Collaboration",
+    "created_at": "2025-10-28",
+    "tags": [
+      "cli",
+      "ai",
+      "spec-driven",
+      "automation"
+    ]
+  },
+  "requirements": {
+    "core": [
+      "Input: Raw unstructured requirement text.",
+      "Processing: Analyze and structure into standardized JSON spec.",
+      "Output: AI-consumable JSON with explicit fields for UI, logic, and constraints.",
+      "CLI should support both interactive and non-interactive modes."
+    ],
+    "optional": [
+      "Support versioning for generated specs.",
+      "Allow diff comparison between specs.",
+      "Integrate with OpenAPI or AI model configs."
+    ]
+  },
+  "structure": {
+    "input": {
+      "type": "string",
+      "description": "Raw natural language describing feature or product requirement."
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tech_stack": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ai_guidance": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "intent"
+      ]
+    }
+  },
+  "examples": {
+    "input_example": "User wants a dashboard that shows real-time sales and traffic data.",
+    "output_example": {
+      "title": "Real-Time Sales Dashboard",
+      "description": "A dashboard for monitoring sales and traffic in real-time.",
+      "intent": "Build frontend UI and backend API integration for real-time analytics.",
+      "components": [
+        "Chart",
+        "API Polling Service",
+        "Dashboard Layout"
+      ],
+      "acceptance_criteria": [
+        "Data updates every 5 seconds",
+        "Responsive across all devices",
+        "Uses WebSocket for live updates"
+      ],
+      "tech_stack": [
+        "Angular",
+        "NestJS",
+        "WebSocket"
+      ],
+      "ai_guidance": "Focus on modular components and real-time data streaming efficiency."
+    }
+  },
+  "integration": {
+    "future": [
+      "Connect with AI model for auto-prompt generation",
+      "Export spec to project scaffolding tool",
+      "Support YAML and TOML formats"
+    ]
+  }
+}

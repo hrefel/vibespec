@@ -1,0 +1,120 @@
+{
+  "name": "vibes-cli",
+  "version": "1.0.0",
+  "domain": "developer-tools",
+  "framework": "nodejs",
+  "description": "A CLI tool for Specs Driven Development (SDD) that transforms raw human requirements into structured AI-ready specs and generative prompts.",
+  "objectives": [
+    "Allow developers to convert unstructured text requirements into standardized JSON or YAML specifications.",
+    "Generate contextual AI prompts that can be directly used by LLMs for code generation.",
+    "Provide modular and extensible architecture for custom domains (frontend, backend, infra, testing)."
+  ],
+  "commands": [
+    {
+      "name": "init",
+      "description": "Initialize a new vibes project with default configuration.",
+      "options": [
+        {
+          "flag": "--dir <path>",
+          "description": "Specify the target directory."
+        },
+        {
+          "flag": "--template <domain>",
+          "description": "Initialize with a predefined domain template."
+        }
+      ]
+    },
+    {
+      "name": "generate",
+      "description": "Parse raw requirement text and produce a structured spec file.",
+      "options": [
+        {
+          "flag": "--input <file>",
+          "description": "Specify input text or markdown file."
+        },
+        {
+          "flag": "--format <json|yaml>",
+          "description": "Output format type."
+        },
+        {
+          "flag": "--domain <domain>",
+          "description": "Define the domain (frontend, backend, infra, etc.)."
+        }
+      ]
+    },
+    {
+      "name": "prompt",
+      "description": "Generate AI prompt from an existing spec file.",
+      "options": [
+        {
+          "flag": "--spec <file>",
+          "description": "Specify the input spec file."
+        },
+        {
+          "flag": "--model <ai_model>",
+          "description": "Choose AI model (gpt-5, claude, llama, etc.)."
+        }
+      ]
+    },
+    {
+      "name": "run",
+      "description": "Execute AI code generation using the generated prompt.",
+      "options": [
+        {
+          "flag": "--spec <file>",
+          "description": "Specify the spec file to execute."
+        },
+        {
+          "flag": "--out <dir>",
+          "description": "Output directory for generated code."
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "core_modules": [
+      "parser",
+      "analyzer",
+      "transformer",
+      "prompt-builder",
+      "executor"
+    ],
+    "folders": {
+      "core": "Houses main logic for parsing, transforming, and executing specs.",
+      "commands": "Contains CLI command handlers.",
+      "templates": "Default spec templates for each domain.",
+      "types": "Type definitions for specs and prompts.",
+      "utils": "Helper functions such as logging, file I/O, etc."
+    }
+  },
+  "tech_stack": {
+    "language": "TypeScript",
+    "framework": "Node.js",
+    "cli_framework": "Commander.js",
+    "ai_integration": [
+      "OpenAI API",
+      "Anthropic Claude",
+      "Local LLM Adapter"
+    ]
+  },
+  "output_examples": {
+    "spec_example": {
+      "name": "todo-app-generator",
+      "domain": "frontend",
+      "framework": "angular",
+      "description": "Generate a todo app with CRUD functionality.",
+      "requirements": [
+        "User can add, edit, and delete tasks.",
+        "Tasks persist using local storage."
+      ],
+      "tech_stack": {
+        "language": "TypeScript",
+        "framework": "Angular"
+      },
+      "prompt": {
+        "instruction": "Generate Angular components and services based on this spec.",
+        "ai_model": "gpt-5"
+      }
+    }
+  }
+}

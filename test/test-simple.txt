@@ -1,0 +1,1 @@
+Build a simple blog website with user registration, post creation, and commenting features. Use React for frontend and Node.js with MongoDB for backend.

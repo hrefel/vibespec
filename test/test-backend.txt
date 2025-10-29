@@ -1,0 +1,19 @@
+Build a RESTful API for an e-commerce platform with the following endpoints:
+- Product catalog management (CRUD operations)
+- User authentication and authorization
+- Shopping cart functionality
+- Order processing and tracking
+- Payment integration with Stripe
+- Inventory management
+- Admin dashboard API
+
+Requirements:
+- JWT-based authentication
+- Rate limiting and security headers
+- Redis for caching
+- PostgreSQL database
+- Comprehensive API documentation with Swagger
+- Unit and integration tests
+- Docker containerization
+
+Tech stack: Node.js, Express, PostgreSQL, Redis, Docker

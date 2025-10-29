@@ -1,0 +1,169 @@
+{
+  "spec_version": "5.0.0",
+  "name": "vibes-cli",
+  "description": "CLI for transforming raw requirements into structured specs using hybrid parsing (AI + heuristic) with optional configuration, in-memory cache, and environment variable support.",
+  "objectives": [
+    "Convert unstructured natural language requirements into standardized spec JSON.",
+    "Leverage both AI reasoning and heuristic parsing for balanced accuracy and speed.",
+    "Support environment variables, .env, and config files for token management.",
+    "Use in-memory caching to minimize repeated AI calls."
+  ],
+  "commands": [
+    {
+      "name": "parse",
+      "description": "Convert raw text or file into structured spec.",
+      "usage": "vibes parse <input-file|text> [options]",
+      "options": [
+        "--output <file>",
+        "--format <json|yaml>",
+        "--provider <openai|claude|glm>",
+        "--token <apiKey>",
+        "--interactive",
+        "--no-cache"
+      ]
+    },
+    {
+      "name": "validate",
+      "description": "Validate spec file against internal schema.",
+      "usage": "vibes validate <spec-file>"
+    },
+    {
+      "name": "config",
+      "description": "Display or modify vibes configuration.",
+      "usage": "vibes config [get|set] <key> [value]"
+    },
+    {
+      "name": "cache",
+      "description": "Manage in-memory cache (view or clear).",
+      "usage": "vibes cache [status|clear]"
+    }
+  ],
+  "modes": {
+    "non_interactive": {
+      "input": "File path or stdin",
+      "output": "Writes structured JSON/YAML spec"
+    },
+    "interactive": {
+      "flow": [
+        "1. User enters raw requirement text.",
+        "2. CLI detects entities, components, and tech hints.",
+        "3. CLI shows preview of structured output.",
+        "4. User confirms or refines fields.",
+        "5. CLI saves final spec file."
+      ]
+    }
+  },
+  "processing": {
+    "type": "hybrid",
+    "pipeline": [
+      {
+        "stage": "heuristic_parse",
+        "description": "Basic keyword extraction, entity detection, and rule-based structuring."
+      },
+      {
+        "stage": "ai_refine",
+        "description": "Send heuristic output to LLM for refinement and normalization.",
+        "adapters": [
+          {
+            "provider": "openai",
+            "env": "OPENAI_API_KEY",
+            "model": "gpt-4o-mini"
+          },
+          {
+            "provider": "claude",
+            "env": "ANTHROPIC_API_KEY",
+            "model": "claude-3-haiku"
+          },
+          {
+            "provider": "glm",
+            "env": "ZAI_API_KEY",
+            "model": "glm-4-flash"
+          }
+        ]
+      }
+    ]
+  },
+  "env_support": {
+    "file": ".env",
+    "loader": "dotenv",
+    "allow_global_env": true,
+    "variables": [
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "ZAI_API_KEY",
+      "VIBES_AI_KEY"
+    ],
+    "token_resolution_order": [
+      "CLI flag (--token)",
+      "Global env variable",
+      ".env file",
+      "vibes.config.json"
+    ]
+  },
+  "cache": {
+    "type": "in_memory",
+    "scope": "session",
+    "max_entries": 50,
+    "strategy": "LRU",
+    "key_pattern": "hash(inputText + provider)",
+    "usage": {
+      "when_enabled": "Skip LLM call if identical input was processed before.",
+      "invalidate": "Automatically cleared on CLI restart or via 'vibes cache clear'."
+    }
+  },
+  "spec_schema": {
+    "required": ["title", "domain", "description", "requirements"],
+    "optional": ["components", "tech_stack", "acceptance_criteria", "ai_guidance"],
+    "fields": {
+      "title": "Short title of the feature or requirement",
+      "domain": "Domain category (frontend, backend, infra, testing, etc.)",
+      "description": "Concise overview of what is being built",
+      "requirements": "List of concrete goals or functionalities",
+      "components": "Detected logical or UI components involved",
+      "tech_stack": "List of detected technologies or frameworks",
+      "acceptance_criteria": "Conditions for completion or validation",
+      "ai_guidance": "LLM refinement or implementation hints"
+    }
+  },
+  "validation_rules": {
+    "title": { "minLength": 5, "maxLength": 100 },
+    "requirements": { "minItems": 1 },
+    "tech_stack": { "items": { "pattern": "^[a-zA-Z0-9.-]+$" } }
+  },
+  "error_handling": {
+    "invalid_input": {
+      "action": "Show error message and guidance",
+      "example": "Input too short or empty."
+    },
+    "missing_api_key": {
+      "action": "Prompt user or read from environment variables",
+      "example": "No API key found for provider 'openai'."
+    },
+    "ai_timeout": {
+      "action": "Retry or fallback to heuristic parsing result."
+    }
+  },
+  "configuration": {
+    "optional": true,
+    "file": "vibes.config.json",
+    "default": {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "useCache": true
+    }
+  },
+  "versioning": {
+    "enabled": true,
+    "metadata": {
+      "generated_by": "vibes-cli v5.0.0",
+      "timestamp": "ISO8601"
+    }
+  },
+  "future": {
+    "plans": [
+      "Add YAML and TOML output support",
+      "Add diff comparison between specs",
+      "Introduce local embedding cache for offline mode"
+    ]
+  }
+}

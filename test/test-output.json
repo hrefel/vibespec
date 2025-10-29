@@ -1,0 +1,44 @@
+{
+  "title": "Build a real-time dashboard that displays sales metrics...",
+  "domain": "frontend",
+  "description": "Build a real-time dashboard that displays sales metrics and website traffic data. The dashboard should update automatically every 5 seconds using WebSocket connections. Users should be able to add, edit, and filter the displayed data",
+  "requirements": [
+    "Build a real-time dashboard that displays sales metrics and website traffic data",
+    "The dashboard should update automatically every 5 seconds using WebSocket connections",
+    "Users should be able to add, edit, and filter the displayed data"
+  ],
+  "components": [
+    "Build",
+    "The",
+    "WebSocket",
+    "Users",
+    "We",
+    "React",
+    "inform"
+  ],
+  "tech_stack": [
+    "Websocket",
+    "React",
+    "Nestjs"
+  ],
+  "acceptance_criteria": [
+    "The dashboard should update automatically every 5 seconds using WebSocket connections",
+    "Users should be able to add, edit, and filter the displayed data",
+    "The interface needs to be responsive and work on mobile devices",
+    "The dashboard should include charts for visualizing the data and a table for detailed information"
+  ],
+  "ai_guidance": "Generated using heuristic parsing only. Consider refining manually.",
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibes-cli v5.0.0",
+    "generated_at": "2025-10-28T17:09:48.879Z",
+    "input_hash": "1e8bfd3d7b59712c3646de530500f745334d5f572b000f4e416d33cc41c66359",
+    "processing": {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "heuristic_confidence": 1,
+      "ai_refinement_applied": false,
+      "cache_hit": false
+    }
+  }
+}

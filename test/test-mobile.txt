@@ -1,0 +1,10 @@
+Create a mobile fitness tracking app for iOS and Android that tracks workouts, calories, and provides workout recommendations. Features include:
+- User profile with goals and stats
+- Exercise library with videos
+- Workout planner and timer
+- Progress charts and analytics
+- Social features to share achievements
+- Push notifications for workout reminders
+- Integration with Apple Health and Google Fit
+
+Tech: React Native, Firebase, Redux
