@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import { encode as toonEncode, decode as toonDecode } from '@byjohann/toon';
 import { VibeSpec, OutputFormat } from '../types';
 
 /**
@@ -44,6 +45,8 @@ export function writeSpec(
 
     if (format === 'yaml') {
       content = yaml.dump(spec, { indent: 2 });
+    } else if (format === 'toon') {
+      content = toonEncode(spec, { indent: 2 });
     } else {
       content = JSON.stringify(spec, null, 2);
     }
@@ -71,6 +74,8 @@ export function readSpec(filePath: string): VibeSpec {
 
     if (ext === '.yaml' || ext === '.yml') {
       spec = yaml.load(content);
+    } else if (ext === '.toon') {
+      spec = toonDecode(content);
     } else {
       spec = JSON.parse(content);
     }
@@ -89,7 +94,8 @@ export function generateOutputPath(
   format: OutputFormat = 'json'
 ): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-  const filename = `requirement-${timestamp}.spec.${format}`;
+  const extension = format === 'yaml' ? 'yaml' : format === 'toon' ? 'toon' : 'json';
+  const filename = `requirement-${timestamp}.spec.${extension}`;
   return path.join(outputDir, filename);
 }
 

@@ -10,16 +10,7 @@ A CLI tool for transforming raw requirements into structured specs using hybrid 
 - **Intelligent Caching**: LRU cache minimizes redundant API calls
 - **Flexible Configuration**: Environment variables, `.env` files, and config files
 - **Validation**: Built-in spec validation against schema
-- **Multiple Formats**: Output to JSON or YAML
-
-## Installation
-
-```bash
-npm install
-npm run build
-npm link  # Makes 'vibespec' command available globally
-# or use: node dist/index.js
-```
+- **Multiple Formats**: Output to JSON, YAML, or TOON (Token-Oriented Object Notation)
 
 ## Quick Start
 
@@ -34,11 +25,14 @@ cp .env.example .env
 Add your API key:
 
 ```env
+# Choose one provider:
 OPENAI_API_KEY=your-api-key-here
 # or
 ANTHROPIC_API_KEY=your-api-key-here
 # or
 OPENROUTER_API_KEY=your-api-key-here
+# or
+ZAI_API_KEY=your-glm-api-key-here
 ```
 
 ### 2. Parse a Requirement
@@ -66,7 +60,7 @@ vibespec parse <input> [options]
 
 **Options:**
 - `--output <file>` - Output file path (default: auto-generated)
-- `--format <json|yaml>` - Output format (default: json)
+- `--format <json|yaml|toon>` - Output format (default: json)
 - `--provider <openai|claude|openrouter|glm>` - AI provider (default: from config)
 - `--token <apiKey>` - API key override
 - `--interactive` - Enable interactive mode
@@ -87,8 +81,14 @@ vibespec parse input.txt --provider claude
 # Use OpenRouter (free tier available)
 vibespec parse input.txt --provider openrouter
 
+# Use GLM (ZhipuAI)
+vibespec parse input.txt --provider glm
+
 # YAML output format
 vibespec parse input.txt --format yaml
+
+# TOON output format (optimized for LLM token efficiency)
+vibespec parse input.txt --format toon
 
 # Interactive wizard mode
 vibespec parse input.txt --interactive
@@ -108,6 +108,7 @@ vibespec validate <spec-file>
 ```bash
 vibespec validate my-spec.json
 vibespec validate output.yaml
+vibespec validate output.toon
 ```
 
 ### `config` - Manage configuration
@@ -126,7 +127,7 @@ vibespec config [action] [key] [value]
 - `model` - Model name (e.g., gpt-4o-mini, meta-llama/llama-3.1-8b-instruct:free)
 - `useCache` - Enable/disable cache (true, false)
 - `outputPath` - Default output directory
-- `defaultFormat` - Default format (json, yaml)
+- `defaultFormat` - Default format (json, yaml, toon)
 
 **Examples:**
 
@@ -194,6 +195,102 @@ This interactive approach is particularly useful when:
 - You want fine-grained control over the spec
 - The heuristic parser needs human guidance
 - You're working on complex requirements that need clarification
+
+## TOON Format (Token-Oriented Object Notation)
+
+VibeSpec supports TOON, a compact data format optimized for minimizing token consumption when passing structured data to Large Language Models.
+
+### Why Use TOON?
+
+- **Token Efficiency**: Achieves 20-60% token reduction compared to JSON
+- **LLM-Optimized**: Designed specifically for AI consumption, not human readability
+- **Cost Savings**: Reduce token costs when feeding specs to AI coding assistants or LLM-based workflows
+- **Maintains Accuracy**: Benchmarks show competitive or better retrieval accuracy vs JSON
+
+### When to Use TOON
+
+TOON is ideal when:
+- Generated specs will be consumed by LLMs or AI tools
+- You're working with token-limited contexts
+- Token costs are a concern
+- Specs have uniform arrays (requirements, acceptance criteria, tech stack)
+
+Use JSON or YAML when:
+- Human readability is priority
+- Specs are for documentation purposes
+- Integration with tools that don't support TOON
+
+### Usage Examples
+
+```bash
+# Generate spec in TOON format
+vibespec parse requirements.txt --format toon
+
+# Set TOON as default format
+vibespec config set defaultFormat toon
+
+# Validate TOON files
+vibespec validate spec.toon
+```
+
+### Token Savings Example
+
+For a typical requirement spec:
+- **JSON**: ~408 tokens (1,633 bytes)
+- **TOON**: ~361 tokens (1,444 bytes)
+- **Savings**: 20% fewer tokens
+
+Savings increase with larger specs containing more uniform arrays.
+
+### About TOON
+
+TOON combines YAML's indentation-based nesting with CSV's tabular efficiency. It eliminates redundant syntax (braces, brackets, repeated field names) while maintaining full data fidelity.
+
+Learn more: [TOON GitHub Repository](https://github.com/johannschopplich/toon)
+
+## GLM (ZhipuAI) Integration
+
+VibeSpec fully supports GLM (ZhipuAI), a powerful Chinese AI model platform offering competitive performance and pricing.
+
+### Why Use GLM?
+
+- **High Performance**: GLM-4 models offer strong reasoning capabilities
+- **Multilingual Support**: Excellent Chinese language understanding
+- **Cost Effective**: Competitive pricing for API usage
+- **Multiple Models**: Access to GLM-4, GLM-4-Flash, and other variants
+
+### Getting Started with GLM
+
+1. Sign up at [ZhipuAI Open Platform](https://open.bigmodel.cn/)
+2. Get your API key from the dashboard
+3. Set your environment variable:
+
+```bash
+export ZAI_API_KEY=your-glm-api-key
+```
+
+4. Use with VibeSpec:
+
+```bash
+# Use default GLM model
+vibespec parse requirements.txt --provider glm
+
+# Use specific model
+vibespec config set provider glm
+vibespec config set model "glm-4-flash"  # Fast, efficient model
+# or
+vibespec config set model "glm-4.0"  # More capable model
+```
+
+### Available GLM Models
+
+Popular models on ZhipuAI platform:
+- `glm-4-flash` - Fast, cost-effective model (recommended for most use cases)
+- `glm-4.0` - More capable model for complex requirements
+- `glm-4-air` - Balanced performance and cost
+- `glm-4-plus` - Enhanced capabilities
+
+For more models and pricing, visit [ZhipuAI documentation](https://open.bigmodel.cn/dev/api)
 
 ## OpenRouter Integration
 
@@ -318,47 +415,6 @@ Generated specs follow this structure:
 - `devops` - CI/CD, automation
 - `data` - Analytics, ETL, data pipelines
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Build
-npm run build
-
-# Development mode with watch
-npm run watch
-
-# Run without building
-npm run dev parse "your requirement"
-```
-
-## Architecture
-
-```
-src/
-├── commands/        # CLI command handlers
-│   ├── parse.ts
-│   ├── validate.ts
-│   ├── config.ts
-│   └── cache.ts
-├── core/            # Core processing logic
-│   ├── heuristic-parser.ts   # Keyword extraction
-│   ├── ai-adapters.ts        # AI provider integrations
-│   ├── processor.ts          # Hybrid pipeline
-│   └── validator.ts          # Spec validation
-├── types/           # TypeScript definitions
-│   ├── spec.ts
-│   └── config.ts
-├── utils/           # Utility modules
-│   ├── cache.ts              # LRU cache
-│   ├── config-manager.ts     # Config management
-│   ├── token-resolver.ts     # API key resolution
-│   └── file-io.ts            # File operations
-└── index.ts         # CLI entry point
-```
-
 ## Troubleshooting
 
 ### "No API key found"
@@ -379,9 +435,15 @@ The CLI will automatically fall back to heuristic-only parsing. Check:
 - Network connection is working
 - Provider is not rate-limited
 
-### GLM provider not working
+### Using GLM (ZhipuAI)
 
-GLM integration is a placeholder. Use `openai`, `claude`, or `openrouter` instead.
+GLM is fully supported. Use it with:
+```bash
+export ZAI_API_KEY=your-glm-api-key
+vibespec config set provider glm
+vibespec config set model "glm-4-flash"  # or glm-4.0
+vibespec parse requirements.txt
+```
 
 ### Want to use free AI models?
 

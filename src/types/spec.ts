@@ -12,7 +12,7 @@ export type Domain =
   | 'devops'
   | 'data';
 
-export type OutputFormat = 'json' | 'yaml';
+export type OutputFormat = 'json' | 'yaml' | 'toon';
 
 export type AIProvider = 'openai' | 'claude' | 'glm' | 'openrouter';
 

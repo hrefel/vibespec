@@ -16,7 +16,7 @@ export function createParseCommand(): Command {
     .description('Convert raw text or file into structured spec')
     .argument('<input>', 'Input file path or raw text')
     .option('--output <file>', 'Output file path')
-    .option('--format <json|yaml>', 'Output format (json or yaml)', 'json')
+    .option('--format <json|yaml|toon>', 'Output format (json, yaml, or toon)', 'json')
     .option('--provider <openai|claude|openrouter|glm>', 'AI provider to use')
     .option('--model <model>', 'AI model to use (e.g., gpt-4o-mini, claude-3-haiku-20240307, meta-llama/llama-3.1-8b-instruct:free)')
     .option('--token <apiKey>', 'API key for the provider')

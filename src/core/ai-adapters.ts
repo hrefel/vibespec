@@ -381,7 +381,7 @@ Output ONLY valid JSON, no other text or markdown.`;
   private parseResponse(content: string): VibeSpec {
     try {
       // Remove markdown code blocks if present
-      let cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      let cleanedContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
       // Try to extract JSON object
       const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
@@ -391,28 +391,37 @@ Output ONLY valid JSON, no other text or markdown.`;
       // Remove any trailing commas before closing braces/brackets
       jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
 
-      // Attempt to fix unterminated strings by finding the last valid closing brace
+      // Attempt to parse - if it fails due to unterminated strings, try repairs
       let parsed;
       try {
         parsed = JSON.parse(jsonStr);
       } catch (firstError) {
-        // If parsing fails, try to find the longest valid JSON
-        // Work backwards from the end to find a valid closing point
-        let lastValidJson = jsonStr;
-        for (let i = jsonStr.length - 1; i >= 0; i--) {
-          if (jsonStr[i] === '}') {
-            const testStr = jsonStr.substring(0, i + 1);
-            try {
-              parsed = JSON.parse(testStr);
-              lastValidJson = testStr;
-              break;
-            } catch (e) {
-              // Continue searching
+        const errorMsg = (firstError as Error).message;
+
+        // Check if it's an unterminated string error
+        if (errorMsg.includes('Unterminated string') || errorMsg.includes('Unexpected end')) {
+          console.warn('⚠️  Detected incomplete JSON from OpenRouter, attempting repair...');
+
+          // Strategy 1: Try to close unterminated strings and objects
+          let repairedJson = this.repairIncompleteJson(jsonStr);
+
+          try {
+            parsed = JSON.parse(repairedJson);
+            console.log('✓ Successfully repaired JSON');
+          } catch (secondError) {
+            // Strategy 2: Find the last valid complete object
+            parsed = this.extractLastValidJson(jsonStr);
+
+            if (!parsed) {
+              // Log detailed error for debugging
+              console.error('\n[OpenRouter Parse Error]');
+              console.error('Error:', errorMsg);
+              console.error('Raw content (first 500 chars):', content.substring(0, 500));
+              console.error('Extracted JSON (first 500 chars):', jsonStr.substring(0, 500));
+              throw firstError;
             }
           }
-        }
-
-        if (!parsed) {
+        } else {
           throw firstError;
         }
       }
@@ -424,8 +433,58 @@ Output ONLY valid JSON, no other text or markdown.`;
 
       return parsed as VibeSpec;
     } catch (error) {
-      throw new Error(`Failed to parse OpenRouter response: ${(error as Error).message}. Raw content preview: ${content.substring(0, 200)}...`);
+      throw new Error(`Failed to parse OpenRouter response: ${(error as Error).message}. Raw content preview: ${content.substring(0, 200)}`);
     }
+  }
+
+  /**
+   * Attempt to repair incomplete JSON by closing unterminated strings and objects
+   */
+  private repairIncompleteJson(jsonStr: string): string {
+    let repaired = jsonStr.trim();
+
+    // Count opening and closing braces/brackets
+    const openBraces = (repaired.match(/\{/g) || []).length;
+    const closeBraces = (repaired.match(/\}/g) || []).length;
+    const openBrackets = (repaired.match(/\[/g) || []).length;
+    const closeBrackets = (repaired.match(/\]/g) || []).length;
+
+    // Check for unterminated strings
+    const quotes = (repaired.match(/"/g) || []).length;
+    if (quotes % 2 !== 0) {
+      // Odd number of quotes, add closing quote
+      repaired += '"';
+    }
+
+    // Close any unclosed arrays
+    for (let i = 0; i < (openBrackets - closeBrackets); i++) {
+      repaired += ']';
+    }
+
+    // Close any unclosed objects
+    for (let i = 0; i < (openBraces - closeBraces); i++) {
+      repaired += '}';
+    }
+
+    return repaired;
+  }
+
+  /**
+   * Extract the last valid JSON object by searching backwards
+   */
+  private extractLastValidJson(jsonStr: string): any | null {
+    // Work backwards from the end to find a valid closing point
+    for (let i = jsonStr.length - 1; i >= jsonStr.length / 2; i--) {
+      if (jsonStr[i] === '}') {
+        const testStr = jsonStr.substring(0, i + 1);
+        try {
+          return JSON.parse(testStr);
+        } catch (e) {
+          // Continue searching
+        }
+      }
+    }
+    return null;
   }
 }
 

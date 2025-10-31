@@ -1,0 +1,62 @@
+{
+  "title": "Real-Time Collaborative Task Management App",
+  "domain": "fullstack",
+  "description": "A real-time collaborative task management system with user authentication, task prioritization, real-time updates, filtering, dashboard analytics, and mobile-responsive design for team productivity.",
+  "requirements": [
+    "Implement user authentication with JWT tokens and refresh tokens",
+    "Support creation, editing, and deletion of tasks with priority levels (low, medium, high, urgent)",
+    "Enable task assignment to team members with real-time conflict resolution",
+    "Provide real-time updates for task modifications with 1s latency",
+    "Implement status filtering (todo/in-progress/completed), assignee filtering, and priority filtering",
+    "Generate dashboard metrics for task completion rates and team productivity",
+    "Add comment system with threaded replies for task collaboration",
+    "Support file attachments (images, documents) via AWS S3 integration",
+    "Send email notifications for task assignments and deadlines",
+    "Ensure mobile responsiveness for devices 320px and above",
+    "Implement dark mode toggle with theme persistence"
+  ],
+  "components": [
+    "User Authentication Module",
+    "Task Management System",
+    "Real-Time Communication Layer",
+    "Task Filtering Interface",
+    "Dashboard Analytics Module",
+    "Comment Collaboration UI",
+    "File Attachment Handler",
+    "Notification System",
+    "Mobile Responsive Layout",
+    "Dark Mode Theme Engine"
+  ],
+  "tech_stack": [
+    "React with TypeScript",
+    "TailwindCSS",
+    "Socket.io",
+    "Node.js",
+    "Express",
+    "PostgreSQL",
+    "JWT",
+    "AWS S3"
+  ],
+  "acceptance_criteria": [
+    "Real-time updates must trigger within 1 second of modification",
+    "System must handle 100+ concurrent users with stable performance",
+    "Mobile layout must render correctly on 320px+ screens",
+    "All forms must have server-side and client-side validation",
+    "Unit test coverage must reach 80%+ for all core functionality"
+  ],
+  "ai_guidance": "Implement WebSocket for real-time updates with message prioritization. Use JWT with refresh tokens for secure authentication. Design AWS S3 integration with signed URLs for file attachments. Implement dark mode with CSS variables and user preference storage. Ensure real-time updates use binary protocols for low latency.",
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibes-cli v5.0.0",
+    "generated_at": "2025-10-29T10:43:15.108Z",
+    "input_hash": "a8903ff016ae1301514de268b14f76c7d907db7c614468a854fe6b298e4c0d7b",
+    "processing": {
+      "provider": "openrouter",
+      "model": "qwen/qwen3-4b:free",
+      "heuristic_confidence": 1,
+      "ai_refinement_applied": true,
+      "cache_hit": false,
+      "refinement_method": "ai"
+    }
+  }
+}

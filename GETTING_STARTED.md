@@ -50,15 +50,22 @@ export OPENAI_API_KEY=your-api-key-here
 # Option 2: OpenRouter (free tier available)
 export OPENROUTER_API_KEY=your-openrouter-key-here
 
-# Option 3: Create .env file
+# Option 3: GLM (ZhipuAI)
+export ZAI_API_KEY=your-glm-api-key-here
+
+# Option 4: Create .env file
 echo "OPENAI_API_KEY=your-api-key-here" > .env
 # or
 echo "OPENROUTER_API_KEY=your-openrouter-key-here" > .env
+# or
+echo "ZAI_API_KEY=your-glm-api-key-here" > .env
 
 # Then run parse
 vibespec parse "Build a todo app with add, edit, and delete functionality using React"
 # or with OpenRouter
 vibespec parse "Build a todo app with add, edit, and delete functionality using React" --provider openrouter
+# or with GLM
+vibespec parse "Build a todo app with add, edit, and delete functionality using React" --provider glm
 ```
 
 **From a file:**
@@ -115,10 +122,16 @@ vibespec cache clear
 ### Workflow 1: Quick Spec Generation
 
 ```bash
-# Generate spec from text
+# Generate spec from text (JSON)
+vibespec parse "User wants dashboard with sales data"
+
+# Generate in YAML format
 vibespec parse "User wants dashboard with sales data" --format yaml
 
-# Spec is saved to ./specs/requirement-[timestamp].spec.yaml
+# Generate in TOON format (optimized for LLM token efficiency)
+vibespec parse "User wants dashboard with sales data" --format toon
+
+# Spec is saved to ./specs/requirement-[timestamp].spec.[format]
 ```
 
 ### Workflow 2: AI-Powered Parsing
@@ -163,7 +176,23 @@ vibespec parse requirements.txt --output spec.json
 # No API costs for free tier models!
 ```
 
-### Workflow 5: Team Configuration
+### Workflow 5: Using GLM (ZhipuAI)
+
+```bash
+# Set up GLM with your API key
+export ZAI_API_KEY=your-glm-key-here
+
+# Configure to use GLM by default
+vibespec config set provider glm
+vibespec config set model "glm-4-flash"
+
+# Parse requirements using GLM
+vibespec parse requirements.txt --output spec.json
+
+# GLM offers competitive pricing and excellent multilingual support
+```
+
+### Workflow 6: Team Configuration
 
 ```bash
 # Set team defaults
@@ -213,19 +242,32 @@ vibespec cache status
    - Enable caching to avoid repeated AI calls: `config set useCache true`
    - Use heuristic-only mode (no API key) for quick drafts
 
-3. **Multiple Providers**: Switch providers easily:
+3. **Multiple Formats**: Choose the right format for your use case:
+   ```bash
+   # JSON - Best for general use and tooling compatibility
+   vibespec parse input.txt --format json
+
+   # YAML - Best for human readability
+   vibespec parse input.txt --format yaml
+
+   # TOON - Best for LLM consumption (20-60% fewer tokens)
+   vibespec parse input.txt --format toon
+   ```
+
+4. **Multiple Providers**: Switch providers easily:
    ```bash
    vibespec parse input.txt --provider claude
    vibespec parse input.txt --provider openai
    vibespec parse input.txt --provider openrouter
+   vibespec parse input.txt --provider glm
    ```
 
-4. **Interactive Mode**: Use the wizard when you need more control:
+5. **Interactive Mode**: Use the wizard when you need more control:
    ```bash
    vibespec parse input.txt --interactive
    ```
 
-5. **Batch Processing**: Create a script to process multiple files:
+6. **Batch Processing**: Create a script to process multiple files:
    ```bash
    for file in requirements/*.txt; do
      vibespec parse "$file" --output "specs/$(basename $file .txt).json"
@@ -244,8 +286,9 @@ vibespec cache status
 - **Solution**: Provide at least 20 characters of text
 
 **Problem**: "No API key found"
-- **Solution**: Set one of: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, or use `--token` flag
+- **Solution**: Set one of: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `ZAI_API_KEY`, or use `--token` flag
 - **Free Option**: Use OpenRouter's free tier - sign up at openrouter.ai
+- **Alternative**: Use GLM (ZhipuAI) - sign up at open.bigmodel.cn
 
 **Problem**: "AI refinement failed"
 - **Solution**: The CLI automatically falls back to heuristic parsing. Check your API key and network connection.
