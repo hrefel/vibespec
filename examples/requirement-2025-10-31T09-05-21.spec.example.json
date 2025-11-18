@@ -1,0 +1,1043 @@
+{
+  "title": "TableNow - Restaurant Reservation System",
+  "domain": "fullstack",
+  "description": "An online restaurant reservation system allowing customers to book tables and restaurants to manage reservations efficiently.",
+  "requirements": [
+    "User authentication with email and password",
+    "Restaurant search by name, cuisine, or location",
+    "Table reservation with date, time, and guest selection",
+    "Email confirmation within 10 seconds of booking",
+    "Reservation cancellation functionality",
+    "Admin panel for viewing and managing reservations",
+    "Approval, modification, and rejection of bookings by admins",
+    "Prevention of double bookings",
+    "Support for 500+ concurrent users",
+    "Password hashing for security"
+  ],
+  "components": [
+    "User database",
+    "Restaurant database",
+    "Reservation database",
+    "Email notification service"
+  ],
+  "ui_components": {
+    "design_system": {
+      "breakpoints": {
+        "mobile": "320px - 767px",
+        "tablet": "768px - 1023px",
+        "desktop": "1024px+"
+      },
+      "color_scheme": {
+        "primary": "#2563eb (blue-600)",
+        "secondary": "#64748b (slate-500)",
+        "success": "#16a34a (green-600)",
+        "error": "#dc2626 (red-600)",
+        "warning": "#ea580c (orange-600)",
+        "background": "#ffffff",
+        "surface": "#f8fafc (slate-50)",
+        "text_primary": "#0f172a (slate-900)",
+        "text_secondary": "#475569 (slate-600)"
+      },
+      "typography": {
+        "font_family": "Inter, system-ui, sans-serif",
+        "heading_h1": "32px/40px, font-weight: 700",
+        "heading_h2": "24px/32px, font-weight: 600",
+        "heading_h3": "20px/28px, font-weight: 600",
+        "body_large": "16px/24px, font-weight: 400",
+        "body_regular": "14px/20px, font-weight: 400",
+        "body_small": "12px/16px, font-weight: 400"
+      },
+      "spacing_scale": "4px base unit (4, 8, 12, 16, 24, 32, 48, 64)",
+      "border_radius": "4px (small), 8px (medium), 12px (large)",
+      "shadows": {
+        "small": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "medium": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+        "large": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+      }
+    },
+    "accessibility": {
+      "wcag_level": "AA",
+      "color_contrast": "4.5:1 minimum for text",
+      "keyboard_navigation": "All interactive elements must be keyboard accessible",
+      "screen_reader": "Proper ARIA labels and semantic HTML required",
+      "focus_indicators": "Visible focus states on all interactive elements"
+    },
+    "interfaces": {
+      "user_authentication": {
+        "pages": ["login", "signup", "forgot_password", "reset_password"],
+        "login_page": {
+          "fields": [
+            {
+              "name": "email",
+              "type": "email",
+              "label": "Email Address",
+              "placeholder": "you@example.com",
+              "validation": "Required, valid email format",
+              "error_messages": {
+                "required": "Email is required",
+                "invalid": "Please enter a valid email address"
+              }
+            },
+            {
+              "name": "password",
+              "type": "password",
+              "label": "Password",
+              "placeholder": "Enter your password",
+              "validation": "Required, minimum 8 characters",
+              "show_password_toggle": true,
+              "error_messages": {
+                "required": "Password is required",
+                "min_length": "Password must be at least 8 characters"
+              }
+            }
+          ],
+          "actions": [
+            {
+              "type": "submit",
+              "label": "Sign In",
+              "loading_state": "Signing in...",
+              "disabled_when": "Form invalid or submitting"
+            },
+            {
+              "type": "link",
+              "label": "Forgot password?",
+              "destination": "/forgot-password"
+            },
+            {
+              "type": "link",
+              "label": "Don't have an account? Sign up",
+              "destination": "/signup"
+            }
+          ],
+          "loading_states": {
+            "submitting": "Show spinner in button, disable form",
+            "success": "Redirect to dashboard or intended destination",
+            "error": "Show error message below form, re-enable form"
+          },
+          "layout": "Centered card (max-width: 400px), responsive on mobile"
+        },
+        "signup_page": {
+          "fields": [
+            {
+              "name": "full_name",
+              "type": "text",
+              "label": "Full Name",
+              "placeholder": "John Doe",
+              "validation": "Required, 2-50 characters",
+              "error_messages": {
+                "required": "Name is required",
+                "min_length": "Name must be at least 2 characters",
+                "max_length": "Name cannot exceed 50 characters"
+              }
+            },
+            {
+              "name": "email",
+              "type": "email",
+              "label": "Email Address",
+              "placeholder": "you@example.com",
+              "validation": "Required, valid email, unique",
+              "async_validation": "Check email availability on blur",
+              "error_messages": {
+                "required": "Email is required",
+                "invalid": "Please enter a valid email address",
+                "taken": "This email is already registered"
+              }
+            },
+            {
+              "name": "password",
+              "type": "password",
+              "label": "Password",
+              "placeholder": "Create a password",
+              "validation": "Required, minimum 8 characters, must contain uppercase, lowercase, number",
+              "show_password_toggle": true,
+              "strength_indicator": true,
+              "error_messages": {
+                "required": "Password is required",
+                "weak": "Password must be at least 8 characters with uppercase, lowercase, and number"
+              }
+            },
+            {
+              "name": "confirm_password",
+              "type": "password",
+              "label": "Confirm Password",
+              "placeholder": "Re-enter your password",
+              "validation": "Required, must match password",
+              "error_messages": {
+                "required": "Please confirm your password",
+                "mismatch": "Passwords do not match"
+              }
+            }
+          ],
+          "actions": [
+            {
+              "type": "submit",
+              "label": "Create Account",
+              "loading_state": "Creating account...",
+              "disabled_when": "Form invalid or submitting"
+            },
+            {
+              "type": "link",
+              "label": "Already have an account? Sign in",
+              "destination": "/login"
+            }
+          ],
+          "layout": "Centered card (max-width: 400px), responsive on mobile"
+        }
+      },
+      "restaurant_search": {
+        "layout": "Full width with sidebar filters (desktop) or drawer (mobile)",
+        "search_section": {
+          "search_bar": {
+            "type": "text",
+            "placeholder": "Search by restaurant name, cuisine, or location",
+            "icon": "search icon on left",
+            "auto_complete": true,
+            "debounce": "300ms",
+            "clear_button": "Show when text present"
+          },
+          "quick_filters": [
+            {
+              "name": "cuisine",
+              "type": "multi-select dropdown",
+              "options": ["Italian", "Chinese", "Japanese", "Mexican", "Indian", "American", "French", "Thai"],
+              "placeholder": "Cuisine type"
+            },
+            {
+              "name": "location",
+              "type": "text with geolocation",
+              "placeholder": "Location or zip code",
+              "geolocation_button": true
+            },
+            {
+              "name": "date",
+              "type": "date picker",
+              "default": "Today",
+              "min_date": "Today",
+              "max_date": "3 months from today"
+            },
+            {
+              "name": "time",
+              "type": "dropdown",
+              "options": "30-minute intervals from 11:00 AM to 10:00 PM",
+              "default": "Next available time slot"
+            },
+            {
+              "name": "party_size",
+              "type": "number dropdown",
+              "options": "1-20",
+              "default": "2"
+            }
+          ],
+          "advanced_filters": {
+            "trigger": "Filter button opens sidebar/drawer",
+            "filters": [
+              {
+                "name": "price_range",
+                "type": "checkbox group",
+                "options": ["$", "$$", "$$$", "$$$$"]
+              },
+              {
+                "name": "rating",
+                "type": "radio group",
+                "options": ["4.5+", "4.0+", "3.5+", "Any"]
+              },
+              {
+                "name": "features",
+                "type": "checkbox group",
+                "options": ["Outdoor seating", "Parking available", "Wheelchair accessible", "Pet friendly", "Live music"]
+              }
+            ],
+            "actions": [
+              {
+                "type": "button",
+                "label": "Clear all",
+                "style": "text button"
+              },
+              {
+                "type": "button",
+                "label": "Apply filters",
+                "style": "primary button"
+              }
+            ]
+          }
+        },
+        "results_section": {
+          "view_toggle": ["Grid view", "List view", "Map view"],
+          "sort_options": {
+            "type": "dropdown",
+            "options": ["Relevance", "Distance", "Rating", "Price (low to high)", "Price (high to low)", "Availability"],
+            "default": "Relevance"
+          },
+          "results_display": {
+            "list_view": {
+              "card_layout": "Horizontal card with image on left (desktop), vertical card (mobile)",
+              "card_content": [
+                "Restaurant image (aspect ratio 16:9, 200px width on desktop)",
+                "Restaurant name (H3 heading, truncate at 50 chars)",
+                "Cuisine type and price range badges",
+                "Rating (stars + number, e.g., ★ 4.5)",
+                "Location with distance (if geolocation enabled)",
+                "Next available time slot (e.g., 'Available at 7:00 PM')",
+                "Quick action button: 'Reserve' (primary) or 'View Details' (secondary)"
+              ],
+              "hover_state": "Elevate card with shadow, scale 1.02",
+              "click_action": "Navigate to restaurant detail page"
+            },
+            "grid_view": {
+              "columns": "3 columns (desktop), 2 columns (tablet), 1 column (mobile)",
+              "card_layout": "Vertical card",
+              "card_content": "Same as list view but stacked vertically"
+            },
+            "map_view": {
+              "map_provider": "Google Maps or Mapbox",
+              "markers": "Restaurant pins showing name on hover",
+              "info_window": "Mini card with restaurant name, rating, quick reserve button",
+              "interaction": "Click marker opens info window, click info window opens detail page"
+            }
+          },
+          "pagination": {
+            "type": "Load more button or infinite scroll",
+            "items_per_page": 20,
+            "loading_state": "Show skeleton cards while loading"
+          },
+          "empty_state": {
+            "message": "No restaurants found matching your criteria",
+            "illustration": true,
+            "actions": ["Clear filters", "Expand search radius"]
+          }
+        }
+      },
+      "restaurant_detail_page": {
+        "layout": "Single column with sections",
+        "sections": [
+          {
+            "name": "hero_section",
+            "content": [
+              "Image gallery (main image with thumbnail carousel)",
+              "Restaurant name (H1)",
+              "Cuisine type and price range",
+              "Rating and review count (clickable to scroll to reviews)",
+              "Location with 'Get Directions' link",
+              "Quick info: Hours, Phone, Website"
+            ]
+          },
+          {
+            "name": "reservation_widget",
+            "position": "Sticky on desktop (right side), bottom sheet on mobile",
+            "fields": [
+              {
+                "name": "date",
+                "type": "date picker",
+                "default": "Today",
+                "inline_calendar": "Show on focus"
+              },
+              {
+                "name": "time",
+                "type": "button group",
+                "display": "Show available time slots as buttons (disabled if full)",
+                "format": "7:00 PM (X tables left)",
+                "update_on": "Date change"
+              },
+              {
+                "name": "party_size",
+                "type": "dropdown",
+                "options": "1-20"
+              }
+            ],
+            "actions": [
+              {
+                "type": "submit",
+                "label": "Reserve Table",
+                "style": "Primary button, full width",
+                "disabled_when": "No time slot selected or restaurant closed",
+                "click_action": "If logged in: proceed to confirmation, else: show login modal"
+              }
+            ],
+            "availability_indicator": {
+              "display": "Real-time availability status",
+              "states": ["Available", "Limited availability", "Fully booked", "Closed"],
+              "colors": ["green", "orange", "red", "gray"]
+            }
+          },
+          {
+            "name": "about_section",
+            "content": [
+              "Description (expandable if > 300 chars)",
+              "Specialties",
+              "Features/Amenities (icons with labels)"
+            ]
+          },
+          {
+            "name": "menu_section",
+            "content": "Menu preview (link to full menu or embedded PDF/images)"
+          },
+          {
+            "name": "reviews_section",
+            "content": [
+              "Overall rating with breakdown (5-star histogram)",
+              "Individual reviews (sorted by most recent/helpful)",
+              "Review cards: User name, rating, date, review text, helpful count"
+            ],
+            "pagination": "Show 10 reviews, 'Load more' button"
+          },
+          {
+            "name": "map_section",
+            "content": "Embedded map showing restaurant location"
+          }
+        ],
+        "mobile_optimization": {
+          "sticky_reserve_button": "Bottom bar with 'Reserve' button always visible",
+          "collapsible_sections": "About, menu sections collapsed by default"
+        }
+      },
+      "reservation_flow": {
+        "steps": ["Select time", "Review details", "Confirm booking"],
+        "confirmation_modal": {
+          "trigger": "After clicking 'Reserve Table' button",
+          "layout": "Modal dialog (max-width: 500px)",
+          "content": [
+            {
+              "section": "reservation_summary",
+              "display": [
+                "Restaurant name and image",
+                "Date and time",
+                "Party size",
+                "Estimated duration (e.g., '2 hours')",
+                "Special requests field (textarea, optional, max 200 chars)"
+              ]
+            },
+            {
+              "section": "contact_info",
+              "display": [
+                "User name (pre-filled from profile)",
+                "Email (pre-filled, editable)",
+                "Phone number (required, format validation)"
+              ]
+            },
+            {
+              "section": "policies",
+              "display": [
+                "Cancellation policy (e.g., 'Free cancellation up to 2 hours before')",
+                "Terms checkbox (required): 'I agree to the reservation terms'"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "button",
+              "label": "Cancel",
+              "style": "Secondary/outline",
+              "action": "Close modal"
+            },
+            {
+              "type": "submit",
+              "label": "Confirm Reservation",
+              "style": "Primary",
+              "loading_state": "Confirming...",
+              "disabled_when": "Form invalid or submitting",
+              "success_action": "Show success modal, send confirmation email"
+            }
+          ]
+        },
+        "success_modal": {
+          "content": [
+            "Success icon (checkmark animation)",
+            "Heading: 'Reservation Confirmed!'",
+            "Reservation details summary",
+            "Message: 'A confirmation email has been sent to [email]'",
+            "Reservation code (e.g., 'RES-ABC123')"
+          ],
+          "actions": [
+            {
+              "type": "button",
+              "label": "View My Reservations",
+              "action": "Navigate to user dashboard"
+            },
+            {
+              "type": "button",
+              "label": "Done",
+              "action": "Close modal, stay on restaurant page"
+            }
+          ]
+        }
+      },
+      "user_dashboard": {
+        "layout": "Two column (desktop), single column (mobile)",
+        "navigation": {
+          "type": "Sidebar (desktop) or bottom tabs (mobile)",
+          "items": ["Upcoming", "Past", "Favorites", "Profile"]
+        },
+        "upcoming_reservations": {
+          "display": "Card list sorted by date/time (nearest first)",
+          "card_content": [
+            "Restaurant name and image",
+            "Date, time, party size",
+            "Reservation status badge (Pending/Confirmed/Completed/Cancelled)",
+            "Countdown timer (if within 24 hours)",
+            "Quick actions: View details, Modify (if allowed), Cancel"
+          ],
+          "empty_state": {
+            "message": "You have no upcoming reservations",
+            "illustration": true,
+            "action": "Browse restaurants button"
+          },
+          "modify_action": {
+            "trigger": "Click 'Modify' button",
+            "modal": "Same as reservation confirmation but pre-filled with current details",
+            "restrictions": "Show warning if modification is not allowed (e.g., within 2 hours)"
+          },
+          "cancel_action": {
+            "trigger": "Click 'Cancel' button",
+            "confirmation_dialog": {
+              "message": "Are you sure you want to cancel this reservation?",
+              "warning": "Show cancellation policy/fees if applicable",
+              "actions": ["Keep Reservation (secondary)", "Yes, Cancel (danger)"]
+            },
+            "success": "Show toast: 'Reservation cancelled successfully'"
+          }
+        },
+        "past_reservations": {
+          "display": "Same card layout as upcoming",
+          "additional_action": "Leave a review button (if not reviewed)",
+          "filters": "Filter by date range, restaurant"
+        },
+        "favorites": {
+          "display": "Grid of restaurant cards (same as search results)",
+          "action": "Click to view restaurant detail page",
+          "remove": "Heart icon toggle to unfavorite"
+        },
+        "profile_section": {
+          "fields": [
+            "Profile photo (upload/change)",
+            "Full name (editable)",
+            "Email (display only, or require re-authentication to change)",
+            "Phone number (editable)",
+            "Password (change password button)",
+            "Notification preferences (email, SMS toggles)",
+            "Dietary restrictions/preferences (optional textarea)"
+          ],
+          "actions": [
+            {
+              "type": "button",
+              "label": "Save Changes",
+              "style": "Primary"
+            },
+            {
+              "type": "button",
+              "label": "Delete Account",
+              "style": "Danger/text",
+              "confirmation_required": true
+            }
+          ]
+        }
+      },
+      "admin_dashboard": {
+        "layout": "Sidebar navigation + main content area",
+        "navigation": {
+          "items": ["Overview", "Reservations", "Restaurants", "Users", "Settings"]
+        },
+        "overview_page": {
+          "widgets": [
+            {
+              "type": "stat_card",
+              "metrics": ["Total reservations today", "Pending approvals", "Confirmed reservations", "Cancellation rate"]
+            },
+            {
+              "type": "chart",
+              "title": "Reservations trend (last 30 days)",
+              "chart_type": "Line chart"
+            },
+            {
+              "type": "chart",
+              "title": "Popular restaurants",
+              "chart_type": "Bar chart"
+            },
+            {
+              "type": "recent_activity",
+              "title": "Recent reservations",
+              "display": "List of latest 10 reservations with quick actions"
+            }
+          ]
+        },
+        "reservations_page": {
+          "filters": {
+            "position": "Top bar",
+            "controls": [
+              {
+                "name": "status",
+                "type": "tabs",
+                "options": ["All", "Pending", "Confirmed", "Completed", "Cancelled"]
+              },
+              {
+                "name": "date_range",
+                "type": "date range picker",
+                "presets": ["Today", "Tomorrow", "This week", "This month", "Custom"]
+              },
+              {
+                "name": "restaurant",
+                "type": "multi-select dropdown",
+                "options": "List of all restaurants"
+              },
+              {
+                "name": "search",
+                "type": "text",
+                "placeholder": "Search by customer name, email, or reservation code"
+              }
+            ]
+          },
+          "table": {
+            "columns": [
+              {
+                "name": "reservation_code",
+                "sortable": true,
+                "width": "120px"
+              },
+              {
+                "name": "customer",
+                "content": "Name and email",
+                "sortable": true
+              },
+              {
+                "name": "restaurant",
+                "sortable": true
+              },
+              {
+                "name": "date_time",
+                "format": "MMM DD, YYYY at HH:MM AM/PM",
+                "sortable": true
+              },
+              {
+                "name": "party_size",
+                "sortable": true,
+                "width": "100px"
+              },
+              {
+                "name": "status",
+                "display": "Colored badge",
+                "sortable": true,
+                "width": "120px"
+              },
+              {
+                "name": "actions",
+                "content": "Dropdown menu with actions",
+                "width": "80px"
+              }
+            ],
+            "row_actions": {
+              "trigger": "Three-dot menu button",
+              "options": ["View details", "Approve", "Modify", "Reject", "Cancel"],
+              "conditional": "Show actions based on current status"
+            },
+            "bulk_actions": {
+              "enabled": true,
+              "checkbox": "Select multiple rows",
+              "actions": ["Approve selected", "Export to CSV", "Send notification"]
+            },
+            "pagination": {
+              "type": "Standard pagination with page numbers",
+              "items_per_page": "25, 50, 100 options",
+              "default": 25
+            }
+          },
+          "detail_modal": {
+            "trigger": "Click row or 'View details' action",
+            "layout": "Side panel (desktop) or full modal (mobile)",
+            "sections": [
+              {
+                "name": "reservation_info",
+                "fields": ["Reservation code", "Status", "Created at", "Last updated"]
+              },
+              {
+                "name": "customer_info",
+                "fields": ["Name", "Email", "Phone", "Special requests"]
+              },
+              {
+                "name": "booking_info",
+                "fields": ["Restaurant", "Date", "Time", "Party size", "Duration"]
+              },
+              {
+                "name": "admin_actions",
+                "buttons": [
+                  {
+                    "label": "Approve",
+                    "style": "Success",
+                    "show_when": "status is pending"
+                  },
+                  {
+                    "label": "Modify",
+                    "style": "Primary",
+                    "action": "Open modify form"
+                  },
+                  {
+                    "label": "Reject",
+                    "style": "Danger",
+                    "show_when": "status is pending or confirmed",
+                    "requires": "Rejection reason (textarea)"
+                  },
+                  {
+                    "label": "Send notification",
+                    "style": "Secondary",
+                    "action": "Open email composer"
+                  }
+                ]
+              },
+              {
+                "name": "activity_log",
+                "display": "Timeline of status changes and actions",
+                "format": "[Timestamp] [User] [Action] [Details]"
+              }
+            ]
+          }
+        },
+        "restaurants_page": {
+          "description": "CRUD interface for managing restaurant listings",
+          "table": {
+            "columns": ["Name", "Cuisine", "Location", "Status (Active/Inactive)", "Total tables", "Actions"],
+            "actions": ["Edit", "View reservations", "Deactivate/Activate", "Delete"]
+          },
+          "add_edit_form": {
+            "fields": [
+              "Restaurant name",
+              "Cuisine type (multi-select)",
+              "Description",
+              "Address (with map picker)",
+              "Phone",
+              "Website",
+              "Email",
+              "Operating hours (day-wise time picker)",
+              "Price range",
+              "Features/Amenities (multi-select)",
+              "Photos (multi-upload, max 10)",
+              "Table configuration (table number, capacity, special features)",
+              "Reservation settings (advance booking days, time slot duration, cancellation policy)"
+            ]
+          }
+        }
+      }
+    },
+    "interaction_patterns": {
+      "loading_states": {
+        "page_load": "Full page skeleton loader matching layout",
+        "component_load": "Skeleton cards/shimmer effect",
+        "button_action": "Spinner inside button + loading text",
+        "infinite_scroll": "Spinner at bottom of list"
+      },
+      "error_handling": {
+        "form_validation": "Inline error messages below fields, red border on invalid fields",
+        "api_errors": "Toast notification (top-right) or alert banner depending on severity",
+        "404_page": "Custom 404 page with search and navigation options",
+        "500_page": "Error page with retry button and support contact"
+      },
+      "success_feedback": {
+        "form_submission": "Success toast or modal depending on context",
+        "data_saved": "Toast notification: '[Entity] saved successfully'",
+        "booking_confirmed": "Success modal with details"
+      },
+      "animations": {
+        "page_transitions": "Fade in (150ms)",
+        "modal_open": "Fade in + scale up (200ms)",
+        "toast_notification": "Slide in from right (200ms)",
+        "button_hover": "Scale 1.02 + shadow (100ms)",
+        "card_hover": "Elevate shadow + scale 1.02 (150ms)"
+      },
+      "empty_states": {
+        "required_elements": ["Illustration or icon", "Descriptive message", "Call-to-action button"],
+        "examples": "No reservations, no search results, no favorites"
+      }
+    },
+    "email_templates": {
+      "reservation_confirmation": {
+        "subject": "Your reservation at [Restaurant Name] is confirmed!",
+        "content": [
+          "Logo and header",
+          "Greeting: 'Hi [Customer Name],'",
+          "Confirmation message",
+          "Reservation details card (restaurant, date, time, party size, reservation code)",
+          "Add to calendar button (iCal/Google Calendar links)",
+          "Restaurant contact info and location map",
+          "Cancellation policy",
+          "Modify/Cancel buttons",
+          "Footer with social links and unsubscribe"
+        ],
+        "design": "Responsive HTML email, mobile-optimized"
+      },
+      "reservation_reminder": {
+        "trigger": "24 hours before reservation",
+        "subject": "Reminder: Your reservation at [Restaurant Name] is tomorrow",
+        "content": "Similar to confirmation with additional 'Confirm attendance' CTA"
+      },
+      "cancellation_confirmation": {
+        "subject": "Your reservation at [Restaurant Name] has been cancelled",
+        "content": "Cancellation details + 'Book again' CTA"
+      },
+      "admin_new_reservation": {
+        "recipient": "Restaurant admin",
+        "subject": "New reservation request for [Restaurant Name]",
+        "content": "Reservation details + direct link to approve/reject in admin panel"
+      }
+    },
+    "calendar_integration": {
+      "user_calendar_features": {
+        "add_to_calendar": {
+          "trigger": "Available on confirmation modal and confirmation email",
+          "supported_formats": [
+            {
+              "name": "Google Calendar",
+              "implementation": "Deep link with pre-filled event data",
+              "url_format": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=[Event]&dates=[Start]/[End]&details=[Description]&location=[Location]",
+              "button_style": "Primary with Google Calendar icon"
+            },
+            {
+              "name": "Apple Calendar (iCal)",
+              "implementation": "Generate .ics file download",
+              "format": "RFC 5545 iCalendar format",
+              "button_style": "Primary with Apple icon"
+            },
+            {
+              "name": "Outlook Calendar",
+              "implementation": "Deep link for Outlook.com and .ics for desktop",
+              "url_format": "https://outlook.live.com/calendar/0/deeplink/compose?subject=[Subject]&startdt=[Start]&enddt=[End]&body=[Body]&location=[Location]",
+              "button_style": "Primary with Outlook icon"
+            },
+            {
+              "name": "Yahoo Calendar",
+              "implementation": "Deep link with event parameters",
+              "url_format": "https://calendar.yahoo.com/?v=60&st=[Start]&et=[End]&title=[Title]&desc=[Description]&in_loc=[Location]",
+              "button_style": "Secondary with Yahoo icon"
+            },
+            {
+              "name": "Download ICS",
+              "implementation": "Universal .ics file download",
+              "description": "Works with all calendar applications",
+              "button_style": "Secondary with download icon"
+            }
+          ],
+          "event_details": {
+            "title": "[Restaurant Name] Reservation",
+            "start_time": "Reservation date and time",
+            "end_time": "Start time + estimated duration (default 2 hours)",
+            "location": "Restaurant full address",
+            "description": "Reservation details: Party size: [X], Reservation code: [CODE], Special requests: [REQUESTS], Cancellation policy: [POLICY]",
+            "reminder": "1 day before and 2 hours before",
+            "url": "Link back to user dashboard reservation details"
+          },
+          "ui_placement": {
+            "success_modal": "Prominent 'Add to Calendar' dropdown button below reservation details",
+            "confirmation_email": "Individual calendar service buttons (Google, Apple, Outlook)",
+            "user_dashboard": "Small 'Add to Calendar' link on each upcoming reservation card",
+            "restaurant_detail_page": "After successful booking"
+          }
+        },
+        "calendar_sync": {
+          "description": "Optional feature for future implementation - real-time sync",
+          "oauth_integration": ["Google Calendar API", "Microsoft Graph API (Outlook)", "CalDAV for Apple"],
+          "features": [
+            "Auto-add confirmed reservations to user's calendar",
+            "Auto-update when reservation is modified",
+            "Auto-remove when reservation is cancelled",
+            "Two-way sync: detect calendar conflicts before booking"
+          ],
+          "ui_settings": {
+            "location": "User profile > Notification preferences",
+            "toggle": "Enable automatic calendar sync",
+            "calendar_selection": "Choose which calendar to sync to (dropdown)",
+            "permissions": "OAuth consent flow with clear permission explanation"
+          }
+        }
+      },
+      "admin_calendar_view": {
+        "description": "Calendar-based reservation management interface for admins",
+        "layout": "Full calendar view with reservation blocks",
+        "views": [
+          {
+            "name": "month_view",
+            "display": "Monthly calendar grid",
+            "content": "Each date shows count of reservations (e.g., '12 reservations')",
+            "interaction": "Click date to see day detail or filter reservations page by that date",
+            "indicators": "Color coding: green (normal), orange (busy), red (fully booked)"
+          },
+          {
+            "name": "week_view",
+            "display": "7-day week view with hourly slots",
+            "content": "Reservation blocks positioned by time, sized by duration",
+            "columns": "One column per day",
+            "time_range": "Restaurant operating hours (e.g., 11 AM - 10 PM)",
+            "interaction": "Click reservation block to view details, drag to modify time (optional)"
+          },
+          {
+            "name": "day_view",
+            "display": "Single day timeline view",
+            "content": "Detailed hourly breakdown with all reservations",
+            "layout": "Timeline with reservation cards",
+            "grouping": "Option to group by table number or show all together",
+            "capacity_indicator": "Visual indicator of table availability at each time slot"
+          },
+          {
+            "name": "table_grid_view",
+            "display": "Grid showing all tables across time slots",
+            "rows": "Each table/section",
+            "columns": "30-minute time intervals",
+            "cells": "Empty (available), filled with reservation (customer name, party size)",
+            "interaction": "Click cell to create new reservation or view existing",
+            "color_coding": "Status colors (pending, confirmed, completed, cancelled)"
+          }
+        ],
+        "navigation": {
+          "view_switcher": "Tabs or dropdown: Month / Week / Day / Table Grid",
+          "date_navigation": "Today button, Previous/Next arrows, Date picker",
+          "restaurant_filter": "Multi-select dropdown to show specific restaurants",
+          "quick_jump": "Jump to specific date or reservation code"
+        },
+        "reservation_blocks": {
+          "content": [
+            "Customer name (bold)",
+            "Time (HH:MM AM/PM)",
+            "Party size icon + number",
+            "Table number (if assigned)",
+            "Status badge (small)"
+          ],
+          "color_coding": {
+            "pending": "Orange border",
+            "confirmed": "Green border",
+            "completed": "Gray background",
+            "cancelled": "Red strikethrough"
+          },
+          "interaction": {
+            "click": "Open reservation detail side panel",
+            "hover": "Show tooltip with full details",
+            "right_click": "Context menu with quick actions (approve, modify, cancel)"
+          }
+        },
+        "drag_and_drop": {
+          "enabled": true,
+          "functionality": [
+            "Drag reservation block to different time slot to reschedule",
+            "Drag to different table to reassign",
+            "Visual feedback: ghost block while dragging",
+            "Validation: prevent drops on fully booked slots",
+            "Confirmation: 'Reschedule reservation to [new time]?' dialog"
+          ]
+        },
+        "quick_actions": {
+          "create_reservation": {
+            "trigger": "Click empty time slot or 'New Reservation' button",
+            "modal": "Quick create form with customer search, time, party size",
+            "pre_fill": "If clicked on time slot, pre-fill date and time"
+          },
+          "bulk_operations": {
+            "select_mode": "Enable multi-select mode",
+            "actions": ["Export selected to CSV", "Send reminder emails", "Print reservation list"]
+          }
+        },
+        "availability_overlay": {
+          "toggle": "Show/hide availability heatmap",
+          "visualization": "Color intensity shows booking density",
+          "legend": "Light (low), Medium (moderate), Dark (high), Red (full)",
+          "use_case": "Quickly identify peak times and gaps"
+        },
+        "filters_and_settings": {
+          "status_filter": "Show/hide reservations by status (checkboxes)",
+          "party_size_filter": "Filter by party size range",
+          "table_filter": "Show only specific tables",
+          "time_slot_duration": "Set calendar granularity (15min, 30min, 1hr)",
+          "first_day_of_week": "Sunday or Monday",
+          "time_format": "12-hour or 24-hour"
+        }
+      },
+      "ics_file_generation": {
+        "library": "ics (npm package) or manual RFC 5545 implementation",
+        "required_fields": {
+          "VERSION": "2.0",
+          "PRODID": "-//TableNow//Reservation System//EN",
+          "CALSCALE": "GREGORIAN",
+          "METHOD": "PUBLISH",
+          "BEGIN": "VEVENT",
+          "UID": "unique-reservation-id@tablenow.com",
+          "DTSTAMP": "Creation timestamp",
+          "DTSTART": "Start datetime in UTC",
+          "DTEND": "End datetime in UTC",
+          "SUMMARY": "Event title",
+          "DESCRIPTION": "Event description with reservation details",
+          "LOCATION": "Restaurant address",
+          "STATUS": "CONFIRMED",
+          "SEQUENCE": "0 (increment on updates)",
+          "VALARM": "Reminder settings",
+          "END": "VEVENT"
+        },
+        "alarm_configuration": [
+          {
+            "trigger": "1 day before",
+            "action": "DISPLAY",
+            "description": "Reminder: Restaurant reservation tomorrow"
+          },
+          {
+            "trigger": "2 hours before",
+            "action": "DISPLAY",
+            "description": "Reminder: Restaurant reservation in 2 hours"
+          }
+        ],
+        "timezone_handling": {
+          "storage": "Store all times in UTC in database",
+          "display": "Convert to restaurant's local timezone",
+          "ics_file": "Include VTIMEZONE component with timezone info"
+        }
+      },
+      "mobile_calendar_integration": {
+        "ios": {
+          "method": "Deep links to Calendar app or EventKit framework",
+          "implementation": "webcal:// protocol or .ics file download",
+          "fallback": "Universal .ics download"
+        },
+        "android": {
+          "method": "Intent to Google Calendar or .ics file",
+          "implementation": "content://com.android.calendar intent or download",
+          "fallback": "Universal .ics download"
+        },
+        "pwa": {
+          "web_share_api": "Use navigator.share to share .ics file",
+          "file_system_access": "Download .ics to device"
+        }
+      }
+    }
+  },
+  "tech_stack": [
+    "NextJS",
+    "Node.js",
+    "HonoJS",
+    "PostgreSQL",
+    "JWT",
+    "Nodemailer",
+    "bcrypt",
+    "ics (for iCalendar file generation)",
+    "FullCalendar or React Big Calendar (for admin calendar view)",
+    "date-fns or dayjs (for date/time manipulation)"
+  ],
+  "acceptance_criteria": [
+    "95% of bookings completed successfully",
+    "Average page response time under 2 seconds",
+    "Users can successfully sign up and log in",
+    "Users can search for restaurants and view available time slots",
+    "Users can make reservations and receive confirmation emails within 10 seconds",
+    "Users can cancel reservations",
+    "Admin users can view, approve, modify, or reject reservations",
+    "Users can add reservations to their personal calendars (Google, Apple, Outlook) with one click",
+    "Calendar export files (.ics) contain all reservation details and reminders",
+    "Admin calendar view displays all reservations in month/week/day/table grid formats",
+    "Admin can drag-and-drop reservations to reschedule in calendar view"
+  ],
+  "ai_guidance": "Implement proper error handling and user feedback. Use responsive design for mobile compatibility. Implement proper input validation on both client and server sides. Use secure password hashing algorithms like bcrypt. Implement rate limiting to prevent abuse. Use caching for frequently accessed data to improve performance. Implement proper logging for debugging and monitoring.",
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibes-cli v5.0.0",
+    "generated_at": "2025-10-31T09:05:21.370Z",
+    "input_hash": "092f7005c12ecc8b9673b62daeeed7db61f1038d6bea0635c5bcbc454836daa0",
+    "processing": {
+      "provider": "openrouter",
+      "model": "z-ai/glm-4.5-air:free",
+      "heuristic_confidence": 0.7500000000000001,
+      "ai_refinement_applied": true,
+      "cache_hit": false,
+      "refinement_method": "ai"
+    }
+  }
+}

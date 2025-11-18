@@ -1,0 +1,868 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vibespec.dev/schema/v1.0.0",
+  "title": "VibeSpec Standard Format",
+  "description": "JSON Schema for VibeSpec CLI output format v1.0.0",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "title",
+    "domain",
+    "description",
+    "requirements",
+    "tech_stack",
+    "acceptance_criteria",
+    "metadata"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to this JSON schema"
+    },
+    "spec_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the spec format"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Project or application title"
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["fullstack", "frontend", "backend", "mobile", "desktop"],
+      "description": "Application domain"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1000,
+      "description": "Clear project description"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      },
+      "description": "Functional and non-functional requirements"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "High-level system components"
+    },
+    "architecture": {
+      "type": "object",
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/module"
+          }
+        },
+        "shared_modules": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "ui_components": {
+      "type": "object",
+      "properties": {
+        "design_system": {
+          "$ref": "#/definitions/design_system"
+        },
+        "accessibility": {
+          "$ref": "#/definitions/accessibility"
+        },
+        "interfaces": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/interface"
+          }
+        },
+        "interaction_patterns": {
+          "$ref": "#/definitions/interaction_patterns"
+        },
+        "email_templates": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/email_template"
+          }
+        }
+      }
+    },
+    "api_specifications": {
+      "type": "object",
+      "properties": {
+        "base_url": {
+          "type": "string"
+        },
+        "authentication": {
+          "$ref": "#/definitions/api_authentication"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/api_endpoint"
+          }
+        },
+        "error_codes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "database_schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["PostgreSQL", "MySQL", "MongoDB", "SQLite", "MariaDB"]
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/database_table"
+          }
+        }
+      }
+    },
+    "state_management": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string"
+        },
+        "global_state": {
+          "type": "object"
+        },
+        "local_state": {
+          "type": "object"
+        },
+        "caching": {
+          "type": "object"
+        }
+      }
+    },
+    "performance_requirements": {
+      "$ref": "#/definitions/performance_requirements"
+    },
+    "security_requirements": {
+      "$ref": "#/definitions/security_requirements"
+    },
+    "testing_requirements": {
+      "$ref": "#/definitions/testing_requirements"
+    },
+    "backend_architecture": {
+      "$ref": "#/definitions/backend_architecture"
+    },
+    "architecture_decision": {
+      "$ref": "#/definitions/architecture_decision"
+    },
+    "deployment": {
+      "$ref": "#/definitions/deployment"
+    },
+    "tech_stack": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Technologies, frameworks, and libraries"
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Measurable success criteria"
+    },
+    "ai_guidance": {
+      "type": "string",
+      "description": "Additional guidance for AI-assisted development"
+    },
+    "metadata": {
+      "$ref": "#/definitions/metadata",
+      "description": "Generation metadata"
+    }
+  },
+  "definitions": {
+    "module": {
+      "type": "object",
+      "required": ["name", "domain", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "api_endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/api/"
+          }
+        }
+      }
+    },
+    "design_system": {
+      "type": "object",
+      "required": ["breakpoints", "color_scheme", "typography"],
+      "properties": {
+        "breakpoints": {
+          "type": "object",
+          "required": ["mobile", "tablet", "desktop"],
+          "properties": {
+            "mobile": {
+              "type": "string"
+            },
+            "tablet": {
+              "type": "string"
+            },
+            "desktop": {
+              "type": "string"
+            }
+          }
+        },
+        "color_scheme": {
+          "type": "object",
+          "required": ["primary", "secondary", "background", "text_primary"],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "typography": {
+          "type": "object",
+          "required": ["font_family"],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "spacing_scale": {
+          "type": "string"
+        },
+        "border_radius": {
+          "type": "string"
+        },
+        "shadows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "required": ["wcag_level", "color_contrast", "keyboard_navigation"],
+      "properties": {
+        "wcag_level": {
+          "type": "string",
+          "enum": ["A", "AA", "AAA"]
+        },
+        "color_contrast": {
+          "type": "string"
+        },
+        "keyboard_navigation": {
+          "type": "string"
+        },
+        "screen_reader": {
+          "type": "string"
+        },
+        "focus_indicators": {
+          "type": "string"
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "properties": {
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "layout": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "interaction_patterns": {
+      "type": "object",
+      "properties": {
+        "loading_states": {
+          "type": "object"
+        },
+        "error_handling": {
+          "type": "object"
+        },
+        "success_feedback": {
+          "type": "object"
+        },
+        "animations": {
+          "type": "object"
+        },
+        "empty_states": {
+          "type": "object"
+        }
+      }
+    },
+    "email_template": {
+      "type": "object",
+      "required": ["subject", "content"],
+      "properties": {
+        "trigger": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "design": {
+          "type": "string"
+        }
+      }
+    },
+    "api_authentication": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["JWT", "OAuth2", "API Key", "Session"]
+        },
+        "flow": {
+          "type": "string"
+        },
+        "token_expiry": {
+          "type": "string"
+        },
+        "refresh_strategy": {
+          "type": "string"
+        }
+      }
+    },
+    "api_endpoint": {
+      "type": "object",
+      "required": ["path", "method", "description"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "authentication_required": {
+          "type": "boolean"
+        },
+        "request": {
+          "type": "object"
+        },
+        "response": {
+          "type": "object"
+        },
+        "rate_limiting": {
+          "type": "string"
+        }
+      }
+    },
+    "database_table": {
+      "type": "object",
+      "required": ["name", "columns"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/database_column"
+          }
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/database_index"
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/database_relationship"
+          }
+        }
+      }
+    },
+    "database_column": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {
+          "type": ["string", "number", "boolean", "null"]
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "database_index": {
+      "type": "object",
+      "required": ["name", "columns"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": ["BTREE", "HASH", "GIN", "GIST"]
+        },
+        "unique": {
+          "type": "boolean"
+        }
+      }
+    },
+    "database_relationship": {
+      "type": "object",
+      "required": ["type", "table"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["one-to-one", "one-to-many", "many-to-one", "many-to-many"]
+        },
+        "table": {
+          "type": "string"
+        },
+        "foreign_key": {
+          "type": "string"
+        },
+        "on_delete": {
+          "type": "string",
+          "enum": ["CASCADE", "SET NULL", "RESTRICT", "NO ACTION"]
+        }
+      }
+    },
+    "performance_requirements": {
+      "type": "object",
+      "properties": {
+        "page_load": {
+          "type": "object"
+        },
+        "api_response": {
+          "type": "object"
+        },
+        "bundle_size": {
+          "type": "object"
+        },
+        "concurrent_users": {
+          "type": ["string", "number"]
+        }
+      }
+    },
+    "security_requirements": {
+      "type": "object",
+      "properties": {
+        "authentication": {
+          "type": "object"
+        },
+        "authorization": {
+          "type": "object"
+        },
+        "data_protection": {
+          "type": "object"
+        },
+        "api_security": {
+          "type": "object"
+        },
+        "compliance": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "testing_requirements": {
+      "type": "object",
+      "properties": {
+        "unit_tests": {
+          "type": "object"
+        },
+        "integration_tests": {
+          "type": "object"
+        },
+        "e2e_tests": {
+          "type": "object"
+        },
+        "accessibility_tests": {
+          "type": "object"
+        },
+        "performance_tests": {
+          "type": "object"
+        }
+      }
+    },
+    "microservice_definition": {
+      "type": "object",
+      "required": ["name", "domain", "description", "responsibilities", "api_endpoints"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Service name in kebab-case"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Business domain this service belongs to"
+        },
+        "description": {
+          "type": "string",
+          "description": "What this service does"
+        },
+        "responsibilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of service responsibilities"
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name for this service"
+        },
+        "api_endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of API endpoints provided by this service"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Other services this service depends on"
+        },
+        "communication": {
+          "type": "string",
+          "enum": ["REST", "gRPC", "GraphQL", "Message Queue", "Event-Driven"],
+          "description": "Communication protocol used"
+        },
+        "scalability": {
+          "type": "string",
+          "enum": ["horizontal", "vertical"],
+          "description": "Scaling strategy"
+        }
+      }
+    },
+    "backend_architecture": {
+      "type": "object",
+      "required": ["pattern"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "enum": ["microservices", "monolithic", "modular-monolith", "serverless"],
+          "description": "Backend architecture pattern"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/microservice_definition"
+          },
+          "description": "List of services (for microservices/modular-monolith)"
+        },
+        "shared_infrastructure": {
+          "type": "object",
+          "properties": {
+            "api_gateway": {
+              "type": "string"
+            },
+            "service_discovery": {
+              "type": "string"
+            },
+            "message_broker": {
+              "type": "string"
+            },
+            "distributed_tracing": {
+              "type": "string"
+            },
+            "caching": {
+              "type": "string"
+            },
+            "load_balancer": {
+              "type": "string"
+            }
+          }
+        },
+        "data_consistency": {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "enum": ["strong-consistency", "eventual-consistency"]
+            },
+            "saga_orchestration": {
+              "type": "boolean"
+            },
+            "event_sourcing": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "architecture_decision": {
+      "type": "object",
+      "required": ["pattern", "rationale", "trade_offs"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "enum": ["microservices", "monolithic", "modular-monolith", "serverless"],
+          "description": "Chosen architecture pattern"
+        },
+        "rationale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Reasons for choosing this pattern"
+        },
+        "trade_offs": {
+          "type": "object",
+          "required": ["benefits", "challenges"],
+          "properties": {
+            "benefits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "challenges": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "decision_drivers": {
+          "type": "object",
+          "properties": {
+            "scalability_requirements": {
+              "type": "string"
+            },
+            "team_structure": {
+              "type": "string"
+            },
+            "domain_complexity": {
+              "type": "string"
+            },
+            "deployment_frequency": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "service_deployment": {
+      "type": "object",
+      "required": ["name", "replicas", "resources"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "replicas": {
+          "type": "number",
+          "minimum": 1
+        },
+        "resources": {
+          "type": "object",
+          "required": ["cpu", "memory"],
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "memory": {
+              "type": "string"
+            }
+          }
+        },
+        "health_check": {
+          "type": "string"
+        },
+        "auto_scaling": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "target_cpu": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "container_orchestration": {
+          "type": "string"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/service_deployment"
+          }
+        },
+        "infrastructure": {
+          "type": "object",
+          "properties": {
+            "load_balancer": {
+              "type": "string"
+            },
+            "service_mesh": {
+              "type": "string"
+            },
+            "monitoring": {
+              "type": "string"
+            },
+            "logging": {
+              "type": "string"
+            }
+          }
+        },
+        "hosting": {
+          "type": "object"
+        },
+        "ci_cd": {
+          "type": "object"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["spec_version", "generated_by", "generated_at"],
+      "properties": {
+        "spec_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "generated_by": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "input_hash": {
+          "type": "string"
+        },
+        "processing": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "heuristic_confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "ai_refinement_applied": {
+              "type": "boolean"
+            },
+            "cache_hit": {
+              "type": "boolean"
+            },
+            "refinement_method": {
+              "type": "string",
+              "enum": ["heuristic", "ai", "hybrid"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

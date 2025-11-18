@@ -1,0 +1,410 @@
+{
+  "$schema": "https://vibespec.dev/schema/v1.0.0",
+  "spec_version": "1.0.0",
+  "title": "Project Title",
+  "domain": "fullstack | frontend | backend | mobile | desktop",
+  "description": "Clear, concise description of the application and its purpose",
+
+  "requirements": [
+    "Functional requirement 1",
+    "Functional requirement 2",
+    "Non-functional requirement (performance, security, etc.)"
+  ],
+
+  "components": [
+    "High-level system component 1",
+    "High-level system component 2"
+  ],
+
+  "architecture": {
+    "modules": [
+      {
+        "name": "module-name",
+        "domain": "domain-area",
+        "description": "What this module does",
+        "components": ["ComponentA", "ComponentB"],
+        "routes": ["/route1", "/route2"],
+        "dependencies": ["other-module"],
+        "api_endpoints": ["/api/endpoint1", "/api/endpoint2"]
+      }
+    ],
+    "shared_modules": {
+      "design-system": ["Button", "Input", "Modal"],
+      "hooks": ["useAuth", "useToast"],
+      "utils": ["formatDate", "validateEmail"]
+    }
+  },
+
+  "ui_components": {
+    "design_system": {
+      "breakpoints": {
+        "mobile": "320px - 767px",
+        "tablet": "768px - 1023px",
+        "desktop": "1024px+"
+      },
+      "color_scheme": {
+        "primary": "#hexcode (color-name)",
+        "secondary": "#hexcode (color-name)",
+        "success": "#hexcode (color-name)",
+        "error": "#hexcode (color-name)",
+        "warning": "#hexcode (color-name)",
+        "background": "#hexcode",
+        "surface": "#hexcode (color-name)",
+        "text_primary": "#hexcode (color-name)",
+        "text_secondary": "#hexcode (color-name)"
+      },
+      "typography": {
+        "font_family": "Primary Font, fallback, sans-serif",
+        "heading_h1": "size/line-height, font-weight: weight",
+        "heading_h2": "size/line-height, font-weight: weight",
+        "heading_h3": "size/line-height, font-weight: weight",
+        "body_large": "size/line-height, font-weight: weight",
+        "body_regular": "size/line-height, font-weight: weight",
+        "body_small": "size/line-height, font-weight: weight"
+      },
+      "spacing_scale": "base unit (multiples)",
+      "border_radius": "size (small), size (medium), size (large)",
+      "shadows": {
+        "small": "box-shadow value",
+        "medium": "box-shadow value",
+        "large": "box-shadow value"
+      }
+    },
+
+    "accessibility": {
+      "wcag_level": "AA | AAA",
+      "color_contrast": "4.5:1 minimum for text",
+      "keyboard_navigation": "All interactive elements must be keyboard accessible",
+      "screen_reader": "Proper ARIA labels and semantic HTML required",
+      "focus_indicators": "Visible focus states on all interactive elements"
+    },
+
+    "interfaces": {
+      "interface_name": {
+        "pages": ["page1", "page2"],
+        "layout": "Layout description",
+
+        "page_name": {
+          "layout": "Specific layout description",
+          "fields": [
+            {
+              "name": "field_name",
+              "type": "text | email | password | date | etc",
+              "label": "Field Label",
+              "placeholder": "Placeholder text",
+              "validation": "Validation rules",
+              "error_messages": {
+                "required": "Error message",
+                "invalid": "Error message"
+              }
+            }
+          ],
+          "actions": [
+            {
+              "type": "submit | button | link",
+              "label": "Action Label",
+              "loading_state": "Loading text",
+              "disabled_when": "Condition",
+              "destination": "/path (for links)"
+            }
+          ],
+          "loading_states": {
+            "submitting": "Behavior",
+            "success": "Behavior",
+            "error": "Behavior"
+          }
+        },
+
+        "section_name": {
+          "layout": "Section layout",
+          "components": [
+            {
+              "type": "component_type",
+              "props": {},
+              "behavior": "Interaction description"
+            }
+          ]
+        }
+      }
+    },
+
+    "interaction_patterns": {
+      "loading_states": {
+        "page_load": "Skeleton loader description",
+        "component_load": "Component loading behavior",
+        "button_action": "Button loading behavior",
+        "infinite_scroll": "Scroll loading behavior"
+      },
+      "error_handling": {
+        "form_validation": "Inline error strategy",
+        "api_errors": "API error display strategy",
+        "404_page": "Not found page description",
+        "500_page": "Server error page description"
+      },
+      "success_feedback": {
+        "form_submission": "Success feedback method",
+        "data_saved": "Save confirmation method",
+        "action_completed": "Action completion feedback"
+      },
+      "animations": {
+        "page_transitions": "Transition type (duration)",
+        "modal_open": "Animation type (duration)",
+        "toast_notification": "Animation type (duration)",
+        "button_hover": "Hover effect (duration)",
+        "card_hover": "Hover effect (duration)"
+      },
+      "empty_states": {
+        "required_elements": ["Illustration", "Message", "CTA"],
+        "examples": "Use cases"
+      }
+    },
+
+    "email_templates": {
+      "template_name": {
+        "trigger": "When this email is sent",
+        "recipient": "Who receives it",
+        "subject": "Email subject line",
+        "content": [
+          "Content element 1",
+          "Content element 2"
+        ],
+        "design": "Design requirements"
+      }
+    }
+  },
+
+  "api_specifications": {
+    "base_url": "/api/v1",
+    "authentication": {
+      "type": "JWT | OAuth | API Key",
+      "flow": "Authentication flow description",
+      "token_expiry": "Duration",
+      "refresh_strategy": "Token refresh approach"
+    },
+    "endpoints": [
+      {
+        "path": "/endpoint",
+        "method": "GET | POST | PUT | DELETE | PATCH",
+        "description": "What this endpoint does",
+        "authentication_required": true,
+        "request": {
+          "headers": {
+            "Authorization": "Bearer {token}",
+            "Content-Type": "application/json"
+          },
+          "query_params": {
+            "param_name": {
+              "type": "string | number | boolean",
+              "required": true,
+              "description": "Parameter description",
+              "example": "example value"
+            }
+          },
+          "body": {
+            "field_name": {
+              "type": "string | number | object | array",
+              "required": true,
+              "validation": "Validation rules",
+              "example": "example value"
+            }
+          }
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "field_name": "type and description"
+            }
+          },
+          "error": {
+            "status": 400,
+            "body": {
+              "error": "Error message format"
+            }
+          }
+        },
+        "rate_limiting": "Rate limit specification"
+      }
+    ],
+    "error_codes": {
+      "400": "Bad Request - Invalid input",
+      "401": "Unauthorized - Authentication failed",
+      "403": "Forbidden - Insufficient permissions",
+      "404": "Not Found - Resource doesn't exist",
+      "409": "Conflict - Resource conflict",
+      "422": "Unprocessable Entity - Validation failed",
+      "429": "Too Many Requests - Rate limit exceeded",
+      "500": "Internal Server Error - Server error",
+      "503": "Service Unavailable - Service down"
+    }
+  },
+
+  "database_schema": {
+    "type": "PostgreSQL | MySQL | MongoDB",
+    "tables": [
+      {
+        "name": "table_name",
+        "description": "What this table stores",
+        "columns": [
+          {
+            "name": "column_name",
+            "type": "data_type",
+            "constraints": ["PRIMARY KEY", "NOT NULL", "UNIQUE"],
+            "default": "default_value",
+            "description": "Column purpose"
+          }
+        ],
+        "indexes": [
+          {
+            "name": "index_name",
+            "columns": ["column1", "column2"],
+            "type": "BTREE | HASH",
+            "unique": false
+          }
+        ],
+        "relationships": [
+          {
+            "type": "one-to-many | many-to-one | many-to-many",
+            "table": "related_table",
+            "foreign_key": "column_name",
+            "on_delete": "CASCADE | SET NULL | RESTRICT"
+          }
+        ]
+      }
+    ]
+  },
+
+  "state_management": {
+    "strategy": "Redux | Zustand | Context API | Jotai",
+    "global_state": {
+      "slice_name": {
+        "state": {
+          "property": "type and initial value"
+        },
+        "actions": ["action1", "action2"],
+        "selectors": ["selector1", "selector2"]
+      }
+    },
+    "local_state": {
+      "component_name": ["state1", "state2"]
+    },
+    "caching": {
+      "strategy": "React Query | SWR | Custom",
+      "cache_time": "Duration",
+      "stale_time": "Duration"
+    }
+  },
+
+  "performance_requirements": {
+    "page_load": {
+      "target": "Load time in seconds",
+      "strategies": ["Code splitting", "Lazy loading", "Image optimization"]
+    },
+    "api_response": {
+      "target": "Response time in milliseconds",
+      "strategies": ["Caching", "Database indexing", "Query optimization"]
+    },
+    "bundle_size": {
+      "target": "Size in KB",
+      "strategies": ["Tree shaking", "Code splitting", "Compression"]
+    },
+    "concurrent_users": "Number of concurrent users supported"
+  },
+
+  "security_requirements": {
+    "authentication": {
+      "method": "JWT | OAuth2 | Session",
+      "password_policy": "Minimum requirements",
+      "multi_factor": "MFA requirements"
+    },
+    "authorization": {
+      "model": "RBAC | ABAC",
+      "roles": ["role1", "role2"]
+    },
+    "data_protection": {
+      "encryption_at_rest": "Encryption method",
+      "encryption_in_transit": "TLS 1.3",
+      "sensitive_data": ["field1", "field2"]
+    },
+    "api_security": {
+      "rate_limiting": "Limits per endpoint",
+      "cors": "CORS policy",
+      "csrf_protection": "CSRF strategy",
+      "input_validation": "Validation approach"
+    },
+    "compliance": ["GDPR", "CCPA", "SOC2"]
+  },
+
+  "testing_requirements": {
+    "unit_tests": {
+      "coverage_target": "Percentage",
+      "framework": "Jest | Vitest | Mocha",
+      "critical_paths": ["path1", "path2"]
+    },
+    "integration_tests": {
+      "framework": "Testing Library | Cypress",
+      "scenarios": ["scenario1", "scenario2"]
+    },
+    "e2e_tests": {
+      "framework": "Playwright | Cypress | Selenium",
+      "user_flows": ["flow1", "flow2"]
+    },
+    "accessibility_tests": {
+      "tool": "axe | WAVE | Lighthouse",
+      "compliance": "WCAG 2.1 Level AA"
+    },
+    "performance_tests": {
+      "tool": "Lighthouse | WebPageTest",
+      "metrics": ["LCP", "FID", "CLS"]
+    }
+  },
+
+  "deployment": {
+    "hosting": {
+      "frontend": "Vercel | Netlify | AWS",
+      "backend": "AWS | GCP | Azure",
+      "database": "Managed service details"
+    },
+    "ci_cd": {
+      "platform": "GitHub Actions | GitLab CI | Jenkins",
+      "pipeline_stages": ["lint", "test", "build", "deploy"],
+      "environments": ["development", "staging", "production"]
+    },
+    "monitoring": {
+      "apm": "New Relic | Datadog | Sentry",
+      "logging": "CloudWatch | ELK Stack",
+      "metrics": ["uptime", "response_time", "error_rate"]
+    }
+  },
+
+  "tech_stack": [
+    "Frontend framework",
+    "Backend framework",
+    "Database",
+    "Authentication library",
+    "Additional libraries"
+  ],
+
+  "acceptance_criteria": [
+    "Measurable criterion 1 with metrics",
+    "Measurable criterion 2 with metrics",
+    "User can complete action X successfully"
+  ],
+
+  "ai_guidance": "Additional guidance for AI-assisted development, best practices, common pitfalls to avoid, and architectural considerations.",
+
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibes-cli vX.X.X",
+    "generated_at": "ISO 8601 timestamp",
+    "input_hash": "SHA-256 hash of input",
+    "processing": {
+      "provider": "openrouter | anthropic | openai",
+      "model": "model-identifier",
+      "heuristic_confidence": 0.0,
+      "ai_refinement_applied": false,
+      "cache_hit": false,
+      "refinement_method": "heuristic | ai | hybrid"
+    }
+  }
+}

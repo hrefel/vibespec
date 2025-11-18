@@ -6,6 +6,7 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { AIProvider, HeuristicOutput, VibeSpec, PROVIDER_CONFIGS } from '../types';
+import { buildDomainPrompt } from './fullstack-prompts';
 
 export interface AIAdapter {
   refine(input: string, heuristicOutput: HeuristicOutput): Promise<VibeSpec>;
@@ -40,7 +41,7 @@ export class OpenAIAdapter implements AIAdapter {
           },
         ],
         temperature: 0.3,
-        max_tokens: 2000,
+        max_tokens: 4000, // Increased for detailed specs
         response_format: { type: 'json_object' },
       });
 
@@ -56,28 +57,8 @@ export class OpenAIAdapter implements AIAdapter {
   }
 
   private buildPrompt(input: string, heuristic: HeuristicOutput): string {
-    return `Given the following raw requirement and preliminary heuristic analysis, refine it into a structured spec.
-
-Raw Input:
-${input}
-
-Heuristic Parse:
-${JSON.stringify(heuristic, null, 2)}
-
-Refine this into a complete spec with the following structure:
-{
-  "title": "Short descriptive title (5-100 chars)",
-  "domain": "One of: frontend, backend, fullstack, mobile, infrastructure, testing, devops, data",
-  "description": "Concise overview (10-500 chars)",
-  "requirements": ["List of concrete functional requirements"],
-  "components": ["Logical or UI components involved"],
-  "tech_stack": ["Technologies or frameworks detected"],
-  "acceptance_criteria": ["Conditions for completion"],
-  "ai_guidance": "Implementation hints or best practices"
-}
-
-Ensure all required fields (title, domain, description, requirements) are present.
-Output valid JSON only.`;
+    // Use enhanced prompts for fullstack/backend domains
+    return buildDomainPrompt(heuristic.domain, input, heuristic);
   }
 
   private parseResponse(content: string): VibeSpec {
@@ -114,7 +95,7 @@ export class ClaudeAdapter implements AIAdapter {
     try {
       const response = await this.client.messages.create({
         model: this.model,
-        max_tokens: 2000,
+        max_tokens: 4000, // Increased for detailed specs
         temperature: 0.3,
         messages: [
           {
@@ -136,28 +117,8 @@ export class ClaudeAdapter implements AIAdapter {
   }
 
   private buildPrompt(input: string, heuristic: HeuristicOutput): string {
-    return `You are a requirement analyzer. Given the following raw requirement and preliminary heuristic analysis, refine it into a structured spec.
-
-Raw Input:
-${input}
-
-Heuristic Parse:
-${JSON.stringify(heuristic, null, 2)}
-
-Refine this into a complete spec with the following JSON structure:
-{
-  "title": "Short descriptive title (5-100 chars)",
-  "domain": "One of: frontend, backend, fullstack, mobile, infrastructure, testing, devops, data",
-  "description": "Concise overview (10-500 chars)",
-  "requirements": ["List of concrete functional requirements"],
-  "components": ["Logical or UI components involved"],
-  "tech_stack": ["Technologies or frameworks detected"],
-  "acceptance_criteria": ["Conditions for completion"],
-  "ai_guidance": "Implementation hints or best practices"
-}
-
-Ensure all required fields (title, domain, description, requirements) are present.
-Output ONLY valid JSON, no other text or markdown.`;
+    // Use enhanced prompts for fullstack/backend domains
+    return buildDomainPrompt(heuristic.domain, input, heuristic);
   }
 
   private parseResponse(content: string): VibeSpec {
@@ -217,7 +178,7 @@ export class GLMAdapter implements AIAdapter {
             },
           ],
           temperature: 0.3,
-          max_tokens: 2000,
+          max_tokens: 4000, // Increased for detailed specs
         }),
       });
 
@@ -240,28 +201,8 @@ export class GLMAdapter implements AIAdapter {
   }
 
   private buildPrompt(input: string, heuristic: HeuristicOutput): string {
-    return `Given the following raw requirement and preliminary heuristic analysis, refine it into a structured spec.
-
-Raw Input:
-${input}
-
-Heuristic Parse:
-${JSON.stringify(heuristic, null, 2)}
-
-Refine this into a complete spec with the following JSON structure:
-{
-  "title": "Short descriptive title (5-100 chars)",
-  "domain": "One of: frontend, backend, fullstack, mobile, infrastructure, testing, devops, data",
-  "description": "Concise overview (10-500 chars)",
-  "requirements": ["List of concrete functional requirements"],
-  "components": ["Logical or UI components involved"],
-  "tech_stack": ["Technologies or frameworks detected"],
-  "acceptance_criteria": ["Conditions for completion"],
-  "ai_guidance": "Implementation hints or best practices"
-}
-
-Ensure all required fields (title, domain, description, requirements) are present.
-Output ONLY valid JSON, no other text or markdown.`;
+    // Use enhanced prompts for fullstack/backend domains
+    return buildDomainPrompt(heuristic.domain, input, heuristic);
   }
 
   private parseResponse(content: string): VibeSpec {
@@ -315,7 +256,7 @@ export class OpenRouterAdapter implements AIAdapter {
           messages: [
             {
               role: 'system',
-              content: 'You are a requirement analyzer. Output valid JSON only, no markdown or code blocks. Ensure all strings are properly escaped and terminated.',
+              content: 'You are a requirement analyzer. Output valid JSON only, no markdown or code blocks. Ensure all strings are properly escaped and terminated. Complete the entire JSON structure.',
             },
             {
               role: 'user',
@@ -323,7 +264,7 @@ export class OpenRouterAdapter implements AIAdapter {
             },
           ],
           temperature: 0.2,
-          max_tokens: 2000,
+          max_tokens: 8000, // Increased to avoid truncation
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
@@ -335,8 +276,19 @@ export class OpenRouterAdapter implements AIAdapter {
         throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
       }
 
-      const data: any = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      // Parse response - handle potential JSON errors from API
+      let data: any;
+      let content: string;
+
+      try {
+        const responseText = await response.text();
+        data = JSON.parse(responseText);
+        content = data.choices?.[0]?.message?.content;
+      } catch (parseError) {
+        // If the API response itself is invalid JSON, this is a critical error
+        const errorMsg = (parseError as Error).message;
+        throw new Error(`OpenRouter API returned invalid JSON response: ${errorMsg}`);
+      }
 
       if (!content) {
         throw new Error('Empty response from OpenRouter API');
@@ -354,28 +306,8 @@ export class OpenRouterAdapter implements AIAdapter {
   }
 
   private buildPrompt(input: string, heuristic: HeuristicOutput): string {
-    return `Given the following raw requirement and preliminary heuristic analysis, refine it into a structured spec.
-
-Raw Input:
-${input}
-
-Heuristic Parse:
-${JSON.stringify(heuristic, null, 2)}
-
-Refine this into a complete spec with the following JSON structure:
-{
-  "title": "Short descriptive title (5-100 chars)",
-  "domain": "One of: frontend, backend, fullstack, mobile, infrastructure, testing, devops, data",
-  "description": "Concise overview (10-500 chars)",
-  "requirements": ["List of concrete functional requirements"],
-  "components": ["Logical or UI components involved"],
-  "tech_stack": ["Technologies or frameworks detected"],
-  "acceptance_criteria": ["Conditions for completion"],
-  "ai_guidance": "Implementation hints or best practices"
-}
-
-Ensure all required fields (title, domain, description, requirements) are present.
-Output ONLY valid JSON, no other text or markdown.`;
+    // Use simplified prompts for OpenRouter (free models have lower capacity)
+    return buildDomainPrompt(heuristic.domain, input, heuristic, true);
   }
 
   private parseResponse(content: string): VibeSpec {
@@ -391,6 +323,14 @@ Output ONLY valid JSON, no other text or markdown.`;
       // Remove any trailing commas before closing braces/brackets
       jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
 
+      // Fix unescaped quotes within string values
+      // This regex finds string values and escapes any unescaped quotes within them
+      jsonStr = this.fixUnescapedQuotes(jsonStr);
+
+      // Fix common string issues: remove unescaped newlines in strings
+      // This handles cases like: "description": "text\nmore text"
+      jsonStr = this.fixStringLiterals(jsonStr);
+
       // Attempt to parse - if it fails due to unterminated strings, try repairs
       let parsed;
       try {
@@ -398,27 +338,39 @@ Output ONLY valid JSON, no other text or markdown.`;
       } catch (firstError) {
         const errorMsg = (firstError as Error).message;
 
-        // Check if it's an unterminated string error
-        if (errorMsg.includes('Unterminated string') || errorMsg.includes('Unexpected end')) {
-          console.warn('⚠️  Detected incomplete JSON from OpenRouter, attempting repair...');
+        // Check if it's an unterminated string or unexpected character error
+        if (errorMsg.includes('Unterminated string') ||
+            errorMsg.includes('Unexpected end') ||
+            errorMsg.includes('Expected') ||
+            errorMsg.includes('after array element')) {
+          console.warn('⚠️  Detected incomplete/malformed JSON from OpenRouter, attempting repair...');
 
-          // Strategy 1: Try to close unterminated strings and objects
-          let repairedJson = this.repairIncompleteJson(jsonStr);
+          // Strategy 1: Try to truncate at last complete structure
+          let repairedJson = this.truncateToLastValidStructure(jsonStr);
 
           try {
             parsed = JSON.parse(repairedJson);
-            console.log('✓ Successfully repaired JSON');
+            console.log('✓ Successfully repaired JSON by truncation');
           } catch (secondError) {
-            // Strategy 2: Find the last valid complete object
-            parsed = this.extractLastValidJson(jsonStr);
+            // Strategy 2: Try to close unterminated strings and objects
+            repairedJson = this.repairIncompleteJson(jsonStr);
 
-            if (!parsed) {
-              // Log detailed error for debugging
-              console.error('\n[OpenRouter Parse Error]');
-              console.error('Error:', errorMsg);
-              console.error('Raw content (first 500 chars):', content.substring(0, 500));
-              console.error('Extracted JSON (first 500 chars):', jsonStr.substring(0, 500));
-              throw firstError;
+            try {
+              parsed = JSON.parse(repairedJson);
+              console.log('✓ Successfully repaired JSON by closure');
+            } catch (thirdError) {
+              // Strategy 3: Find the last valid complete object
+              parsed = this.extractLastValidJson(jsonStr);
+
+              if (!parsed) {
+                // Log detailed error for debugging
+                console.error('\n[OpenRouter Parse Error]');
+                console.error('Error:', errorMsg);
+                console.error('Raw content (first 500 chars):', content.substring(0, 500));
+                console.error('Extracted JSON (first 500 chars):', jsonStr.substring(0, 500));
+                console.error('Around error position 11876:', jsonStr.substring(11800, 11950));
+                throw firstError;
+              }
             }
           }
         } else {
@@ -426,15 +378,93 @@ Output ONLY valid JSON, no other text or markdown.`;
         }
       }
 
-      // Validate required fields
-      if (!parsed.title || !parsed.domain || !parsed.description || !parsed.requirements) {
-        throw new Error('Missing required fields in AI response');
+      // Validate required fields with better error messages
+      const missingFields: string[] = [];
+      if (!parsed.title) missingFields.push('title');
+      if (!parsed.domain) missingFields.push('domain');
+      if (!parsed.description) missingFields.push('description');
+      if (!parsed.requirements) missingFields.push('requirements');
+
+      if (missingFields.length > 0) {
+        console.error('\n[Missing Required Fields]');
+        console.error('Missing:', missingFields.join(', '));
+        console.error('Parsed object keys:', Object.keys(parsed).join(', '));
+        console.error('First 300 chars of response:', content.substring(0, 300));
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
       return parsed as VibeSpec;
     } catch (error) {
       throw new Error(`Failed to parse OpenRouter response: ${(error as Error).message}. Raw content preview: ${content.substring(0, 200)}`);
     }
+  }
+
+  /**
+   * Fix unescaped quotes within string values
+   * This handles cases where AI generates: "description": "This is a "quoted" word"
+   */
+  private fixUnescapedQuotes(jsonStr: string): string {
+    // Find all string values and fix unescaped quotes
+    // This is a more aggressive approach: find key-value pairs and fix their values
+    return jsonStr.replace(/"([^"]+)":\s*"([^"]*)"/g, (match, key, value) => {
+      // If value contains quote marks that aren't escaped, escape them
+      // But be careful not to double-escape already escaped quotes
+      if (value.includes('"') && !value.includes('\\"')) {
+        const fixedValue = value.replace(/"/g, '\\"');
+        return `"${key}": "${fixedValue}"`;
+      }
+      return match;
+    });
+  }
+
+  /**
+   * Fix invalid string literals (unescaped newlines, control characters)
+   */
+  private fixStringLiterals(jsonStr: string): string {
+    // Match string literals and fix unescaped newlines/control chars
+    return jsonStr.replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, (match, content) => {
+      // If the string contains actual newlines (not \n), replace them
+      if (content.includes('\n') || content.includes('\r') || content.includes('\t')) {
+        content = content
+          .replace(/\n/g, '\\n')
+          .replace(/\r/g, '\\r')
+          .replace(/\t/g, '\\t');
+        return `"${content}"`;
+      }
+      return match;
+    });
+  }
+
+  /**
+   * Truncate JSON at the last valid complete structure (before corruption starts)
+   * This is more aggressive but often works better than trying to repair
+   */
+  private truncateToLastValidStructure(jsonStr: string): string {
+    // Find all positions where we have a comma followed by a closing brace/bracket
+    // These are safe truncation points
+    const safePoints: number[] = [];
+
+    for (let i = jsonStr.length - 1; i >= jsonStr.length / 3; i--) {
+      const char = jsonStr[i];
+      const prevChars = jsonStr.substring(Math.max(0, i - 10), i);
+
+      // Look for patterns like:  "field": "value"  } or "field": "value"  ]
+      // After a complete field-value pair
+      if ((char === '}' || char === ']') && prevChars.includes('"')) {
+        // Try to parse from beginning to this point
+        const testStr = jsonStr.substring(0, i + 1);
+        try {
+          JSON.parse(testStr);
+          // This is a valid truncation point!
+          return testStr;
+        } catch (e) {
+          // Continue searching
+        }
+      }
+    }
+
+    // If no valid point found, return original
+    return jsonStr;
   }
 
   /**

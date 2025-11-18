@@ -88,7 +88,16 @@ export class Processor {
       spec.metadata.processing.refinement_method = 'ai';
     } catch (error) {
       // Fallback options on AI failure
-      console.warn(`⚠ AI refinement failed: ${(error as Error).message}`);
+      const errorMsg = (error as Error).message;
+      console.warn(`⚠ AI refinement failed: ${errorMsg}`);
+
+      // Provide helpful suggestions based on the error
+      if (errorMsg.includes('parse') && errorMsg.includes('JSON')) {
+        console.log('\n💡 Tip: Free models often generate malformed JSON. Try one of these:');
+        console.log('   • Use a better model: --model anthropic/claude-3.5-haiku (paid but reliable)');
+        console.log('   • Use a better free model: --model qwen/qwen-2.5-7b-instruct:free');
+        console.log('   • Use wizard mode (interactive) to refine the spec manually\n');
+      }
 
       // Check if wizard mode should be enabled
       const enableWizard = options.enableWizard !== undefined ? options.enableWizard : true;
