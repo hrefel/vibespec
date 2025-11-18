@@ -1,0 +1,545 @@
+{
+  "$schema": "https://vibespec.dev/schema/v1.0.0",
+  "spec_version": "1.0.0",
+  "title": "E-Commerce Platform Backend",
+  "domain": "backend",
+  "description": "Scalable e-commerce platform backend with user management, product catalog, order processing, and payment integration",
+  "requirements": [
+    "Support 5000+ concurrent users",
+    "User authentication and profile management",
+    "Product catalog with search and filtering",
+    "Shopping cart and order processing",
+    "Payment processing integration",
+    "Real-time inventory management",
+    "Order tracking and notifications",
+    "Admin dashboard for product and order management",
+    "Independent deployment of services",
+    "99.9% uptime SLA"
+  ],
+  "components": [
+    "User Service",
+    "Product Service",
+    "Order Service",
+    "Payment Service",
+    "Notification Service",
+    "API Gateway",
+    "Service Discovery",
+    "Message Broker"
+  ],
+  "tech_stack": [
+    "Node.js",
+    "Express",
+    "PostgreSQL",
+    "Redis",
+    "Apache Kafka",
+    "Docker",
+    "Kubernetes",
+    "Kong API Gateway"
+  ],
+  "backend_architecture": {
+    "pattern": "microservices",
+    "services": [
+      {
+        "name": "user-service",
+        "domain": "user-management",
+        "description": "Handles user authentication, authorization, and profile management",
+        "responsibilities": [
+          "User registration and authentication",
+          "JWT token generation and validation",
+          "User profile CRUD operations",
+          "Role-based access control"
+        ],
+        "database": "users_db",
+        "api_endpoints": [
+          "/api/users",
+          "/api/users/:id",
+          "/api/auth/login",
+          "/api/auth/register",
+          "/api/auth/refresh"
+        ],
+        "dependencies": [],
+        "communication": "REST",
+        "scalability": "horizontal"
+      },
+      {
+        "name": "product-service",
+        "domain": "product-catalog",
+        "description": "Manages product catalog, search, and inventory",
+        "responsibilities": [
+          "Product CRUD operations",
+          "Product search and filtering",
+          "Category management",
+          "Inventory tracking"
+        ],
+        "database": "products_db",
+        "api_endpoints": [
+          "/api/products",
+          "/api/products/:id",
+          "/api/products/search",
+          "/api/categories"
+        ],
+        "dependencies": [],
+        "communication": "REST",
+        "scalability": "horizontal"
+      },
+      {
+        "name": "order-service",
+        "domain": "order-management",
+        "description": "Handles order creation, processing, and tracking",
+        "responsibilities": [
+          "Order creation and validation",
+          "Order status management",
+          "Order history tracking",
+          "Saga orchestration for distributed transactions"
+        ],
+        "database": "orders_db",
+        "api_endpoints": [
+          "/api/orders",
+          "/api/orders/:id",
+          "/api/orders/user/:userId"
+        ],
+        "dependencies": [
+          "user-service",
+          "product-service",
+          "payment-service",
+          "notification-service"
+        ],
+        "communication": "REST + Message Queue",
+        "scalability": "horizontal"
+      },
+      {
+        "name": "payment-service",
+        "domain": "payment-processing",
+        "description": "Integrates with payment gateways and processes transactions",
+        "responsibilities": [
+          "Payment processing",
+          "Payment method management",
+          "Refund processing",
+          "Payment webhook handling"
+        ],
+        "database": "payments_db",
+        "api_endpoints": [
+          "/api/payments",
+          "/api/payments/:id",
+          "/api/payments/methods"
+        ],
+        "dependencies": [
+          "user-service"
+        ],
+        "communication": "REST",
+        "scalability": "horizontal"
+      },
+      {
+        "name": "notification-service",
+        "domain": "notifications",
+        "description": "Sends email and push notifications to users",
+        "responsibilities": [
+          "Email notifications",
+          "SMS notifications",
+          "Push notifications",
+          "Notification templates management"
+        ],
+        "database": "notifications_db",
+        "api_endpoints": [
+          "/api/notifications"
+        ],
+        "dependencies": [],
+        "communication": "Message Queue",
+        "scalability": "horizontal"
+      }
+    ],
+    "shared_infrastructure": {
+      "api_gateway": "Kong API Gateway - Single entry point for all services, handles rate limiting, authentication, and routing",
+      "service_discovery": "Kubernetes DNS - Automatic service discovery within K8s cluster",
+      "message_broker": "Apache Kafka - Event streaming for asynchronous communication between services",
+      "distributed_tracing": "Jaeger - Distributed tracing for monitoring and debugging microservices",
+      "caching": "Redis - Distributed cache for session management and frequently accessed data",
+      "load_balancer": "AWS Application Load Balancer - Distributes traffic across service instances"
+    },
+    "data_consistency": {
+      "pattern": "eventual-consistency",
+      "saga_orchestration": true,
+      "event_sourcing": false
+    }
+  },
+  "architecture_decision": {
+    "pattern": "microservices",
+    "rationale": [
+      "High scalability requirements (5000+ concurrent users with expected growth to 50,000+)",
+      "Multiple distinct bounded contexts: user management, product catalog, order processing, payments, notifications",
+      "Need for independent deployment and scaling of services (e.g., scale product search independently during peak shopping)",
+      "Variable load patterns: product search has higher load during business hours, order processing peaks during sales events",
+      "Multiple development teams working on different services",
+      "99.9% uptime requirement necessitates fault isolation between services"
+    ],
+    "trade_offs": {
+      "benefits": [
+        "Independent scaling: Can scale product-service during high search traffic without scaling other services",
+        "Fault isolation: Failure in notification-service doesn't affect order processing",
+        "Technology flexibility: Can use different databases optimized for each service",
+        "Team autonomy: Different teams can work independently on different services",
+        "Independent deployment: Deploy new features to one service without affecting others",
+        "Easier horizontal scaling: Add more instances of specific services as needed"
+      ],
+      "challenges": [
+        "Increased operational complexity: Need to manage multiple services, databases, and deployments",
+        "Distributed transactions: Order creation requires coordination across user, product, payment, and notification services",
+        "Network latency: Inter-service calls add latency compared to in-process calls",
+        "Data consistency: Eventual consistency requires careful design of business logic",
+        "Debugging complexity: Issues may span multiple services requiring distributed tracing",
+        "Higher infrastructure costs: Need API gateway, service mesh, message broker, monitoring"
+      ]
+    },
+    "decision_drivers": {
+      "scalability_requirements": "5000+ concurrent users with peak loads of 50,000+ during sales events. Need to scale product search and order processing independently.",
+      "team_structure": "5 development teams: User Management (3 devs), Product Catalog (4 devs), Order Management (4 devs), Payments (2 devs), Infrastructure (3 devs)",
+      "domain_complexity": "5 distinct bounded contexts with clear boundaries: users, products, orders, payments, notifications. Each has different data models and business logic.",
+      "deployment_frequency": "Multiple deployments per week. Need to deploy hotfixes to individual services without full platform deployment."
+    }
+  },
+  "entities": [
+    {
+      "name": "User",
+      "service": "user-service",
+      "description": "User account information",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Unique user identifier"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "description": "User email address"
+        },
+        {
+          "name": "passwordHash",
+          "type": "string",
+          "required": true,
+          "description": "Bcrypt hashed password"
+        },
+        {
+          "name": "firstName",
+          "type": "string",
+          "required": true,
+          "min_length": 2,
+          "max_length": 50,
+          "description": "User first name"
+        },
+        {
+          "name": "lastName",
+          "type": "string",
+          "required": true,
+          "min_length": 2,
+          "max_length": 50,
+          "description": "User last name"
+        },
+        {
+          "name": "role",
+          "type": "enum",
+          "required": true,
+          "enum_values": ["customer", "admin"],
+          "default": "customer",
+          "description": "User role"
+        },
+        {
+          "name": "createdAt",
+          "type": "datetime",
+          "required": true,
+          "description": "Account creation timestamp"
+        }
+      ],
+      "relationships": [],
+      "indexes": ["email"]
+    },
+    {
+      "name": "Product",
+      "service": "product-service",
+      "description": "Product catalog item",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Unique product identifier"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "min_length": 3,
+          "max_length": 200,
+          "description": "Product name"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": true,
+          "max_length": 2000,
+          "description": "Product description"
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "required": true,
+          "min_value": 0,
+          "description": "Product price in cents"
+        },
+        {
+          "name": "stock",
+          "type": "number",
+          "required": true,
+          "min_value": 0,
+          "description": "Available stock quantity"
+        },
+        {
+          "name": "categoryId",
+          "type": "uuid",
+          "required": true,
+          "description": "Product category"
+        }
+      ],
+      "relationships": [],
+      "indexes": ["name", "categoryId"]
+    },
+    {
+      "name": "Order",
+      "service": "order-service",
+      "description": "Customer order",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Unique order identifier"
+        },
+        {
+          "name": "userId",
+          "type": "uuid",
+          "required": true,
+          "description": "Reference to user in user-service (cross-service reference)"
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "required": true,
+          "enum_values": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+          "default": "pending",
+          "description": "Order status"
+        },
+        {
+          "name": "totalAmount",
+          "type": "number",
+          "required": true,
+          "min_value": 0,
+          "description": "Total order amount in cents"
+        },
+        {
+          "name": "createdAt",
+          "type": "datetime",
+          "required": true,
+          "description": "Order creation timestamp"
+        }
+      ],
+      "relationships": [
+        {
+          "type": "one-to-many",
+          "target_entity": "OrderItem",
+          "foreign_key": "orderId",
+          "cross_service": false,
+          "description": "Order items"
+        }
+      ],
+      "indexes": ["userId", "status"]
+    }
+  ],
+  "api_endpoints": [
+    {
+      "name": "Create Order",
+      "service": "order-service",
+      "method": "POST",
+      "endpoint": "/api/orders",
+      "authentication": "bearer",
+      "description": "Create a new order with items",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer {jwt_token}"
+        },
+        "body": {
+          "items": {
+            "type": "array",
+            "required": true,
+            "description": "Array of order items"
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": 201,
+          "description": "Order created successfully",
+          "body": {
+            "id": "uuid",
+            "userId": "uuid",
+            "status": "pending",
+            "totalAmount": "number"
+          }
+        },
+        {
+          "status": 400,
+          "description": "Invalid request",
+          "body": {
+            "error": "string"
+          }
+        }
+      ],
+      "inter_service_calls": [
+        {
+          "target_service": "user-service",
+          "endpoint": "/api/users/:id",
+          "purpose": "Validate user exists and is active",
+          "type": "synchronous"
+        },
+        {
+          "target_service": "product-service",
+          "endpoint": "/api/products/:id",
+          "purpose": "Validate product availability and get current price",
+          "type": "synchronous"
+        },
+        {
+          "target_service": "payment-service",
+          "endpoint": "/api/payments",
+          "purpose": "Process payment for order",
+          "type": "synchronous"
+        },
+        {
+          "target_service": "notification-service",
+          "endpoint": "kafka:order.created",
+          "purpose": "Send order confirmation email",
+          "type": "asynchronous"
+        }
+      ]
+    }
+  ],
+  "deployment": {
+    "container_orchestration": "Kubernetes",
+    "services": [
+      {
+        "name": "user-service",
+        "replicas": 3,
+        "resources": {
+          "cpu": "500m",
+          "memory": "512Mi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 2,
+          "max": 10,
+          "target_cpu": "70%"
+        }
+      },
+      {
+        "name": "product-service",
+        "replicas": 5,
+        "resources": {
+          "cpu": "1000m",
+          "memory": "1Gi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 3,
+          "max": 20,
+          "target_cpu": "70%"
+        }
+      },
+      {
+        "name": "order-service",
+        "replicas": 4,
+        "resources": {
+          "cpu": "750m",
+          "memory": "768Mi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 3,
+          "max": 15,
+          "target_cpu": "70%"
+        }
+      },
+      {
+        "name": "payment-service",
+        "replicas": 3,
+        "resources": {
+          "cpu": "500m",
+          "memory": "512Mi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 2,
+          "max": 8,
+          "target_cpu": "70%"
+        }
+      },
+      {
+        "name": "notification-service",
+        "replicas": 2,
+        "resources": {
+          "cpu": "250m",
+          "memory": "256Mi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 2,
+          "max": 10,
+          "target_cpu": "70%"
+        }
+      }
+    ],
+    "infrastructure": {
+      "load_balancer": "AWS Application Load Balancer",
+      "service_mesh": "Istio (optional for advanced traffic management)",
+      "monitoring": "Prometheus + Grafana",
+      "logging": "ELK Stack (Elasticsearch, Logstash, Kibana)"
+    }
+  },
+  "acceptance_criteria": [
+    "System handles 5000+ concurrent users with < 200ms average response time",
+    "All services independently deployable without downtime",
+    "99.9% uptime for critical services (user, product, order, payment)",
+    "Order creation completes within 2 seconds including all service calls",
+    "Failed payment transactions properly roll back inventory",
+    "Services recover gracefully from downstream service failures",
+    "Distributed tracing available for all cross-service requests",
+    "Each service has dedicated database with no direct cross-service queries"
+  ],
+  "ai_guidance": {
+    "architecture": "Microservices architecture chosen due to high scalability needs and multiple independent teams. Start with modular monolith if building MVP, then gradually extract services starting with user-service and product-service.",
+    "validation": "Each service validates its own inputs using Zod. API Gateway performs authentication but services also validate tokens.",
+    "error_handling": "Use consistent error format across all services. Implement circuit breakers using resilience4js for inter-service calls.",
+    "security": "API Gateway handles authentication. Services validate JWT tokens. Use mTLS for service-to-service communication in production.",
+    "performance": "Implement Redis caching for frequently accessed data (product details, user sessions). Use database read replicas for product-service.",
+    "testing": "Unit tests for business logic. Integration tests for API endpoints. Contract tests between services using Pact. End-to-end tests for critical flows.",
+    "observability": "Implement distributed tracing with Jaeger. Use structured logging with correlation IDs. Monitor service health with Prometheus metrics."
+  },
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibespec-cli v6.1.1",
+    "generated_at": "2025-11-04T10:30:00.000Z",
+    "input_hash": "abc123",
+    "processing": {
+      "provider": "openrouter",
+      "model": "anthropic/claude-3.5-sonnet",
+      "heuristic_confidence": 0.85,
+      "ai_refinement_applied": true,
+      "cache_hit": false,
+      "refinement_method": "ai"
+    }
+  }
+}

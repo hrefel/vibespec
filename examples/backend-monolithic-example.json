@@ -1,0 +1,333 @@
+{
+  "$schema": "https://vibespec.dev/schema/v1.0.0",
+  "spec_version": "1.0.0",
+  "title": "Small Business Inventory Management API",
+  "domain": "backend",
+  "description": "Simple REST API for small business inventory management with products, orders, and basic reporting",
+  "requirements": [
+    "Support 50-100 concurrent users",
+    "Product catalog management (CRUD)",
+    "Simple order processing",
+    "Basic inventory tracking",
+    "User authentication (admin and staff)",
+    "Simple reporting dashboard",
+    "Single deployment unit",
+    "Fast development and iteration"
+  ],
+  "components": [
+    "REST API Server",
+    "PostgreSQL Database",
+    "Authentication Module",
+    "Product Module",
+    "Order Module",
+    "Report Module"
+  ],
+  "tech_stack": [
+    "Node.js",
+    "Express",
+    "PostgreSQL",
+    "JWT Authentication",
+    "Docker"
+  ],
+  "backend_architecture": {
+    "pattern": "monolithic",
+    "services": [
+      {
+        "name": "inventory-api",
+        "domain": "inventory-management",
+        "description": "Single monolithic API handling all business logic",
+        "responsibilities": [
+          "User authentication and authorization",
+          "Product CRUD operations",
+          "Order processing",
+          "Inventory tracking",
+          "Report generation"
+        ],
+        "database": "inventory_db (single shared database)",
+        "api_endpoints": [
+          "/api/auth/*",
+          "/api/products/*",
+          "/api/orders/*",
+          "/api/reports/*"
+        ],
+        "dependencies": [],
+        "communication": "In-process function calls",
+        "scalability": "vertical"
+      }
+    ],
+    "shared_infrastructure": {
+      "api_gateway": "Not required - single application endpoint",
+      "service_discovery": "Not required - monolithic deployment",
+      "message_broker": "Not required - synchronous processing",
+      "distributed_tracing": "Not required - single process",
+      "caching": "Redis (optional, for session management)",
+      "load_balancer": "NGINX (optional, for high availability)"
+    },
+    "data_consistency": {
+      "pattern": "strong-consistency",
+      "saga_orchestration": false,
+      "event_sourcing": false
+    }
+  },
+  "architecture_decision": {
+    "pattern": "monolithic",
+    "rationale": [
+      "Low concurrent user load (50-100 users)",
+      "Simple CRUD application with minimal business logic complexity",
+      "Small development team (2 developers)",
+      "All features share common data model and business logic",
+      "Fast development and deployment is priority",
+      "Limited DevOps resources and infrastructure budget",
+      "No need for independent scaling of different features"
+    ],
+    "trade_offs": {
+      "benefits": [
+        "Simple development: All code in one codebase, easy to understand",
+        "Easy debugging: Single process, easy to trace execution",
+        "Strong consistency: Database transactions ensure data integrity",
+        "Simple deployment: Single deployment unit, no service coordination",
+        "Lower infrastructure cost: Single server, single database",
+        "Fast initial development: No distributed system complexity",
+        "Easy testing: Can test entire application with integration tests"
+      ],
+      "challenges": [
+        "Scaling limitations: Must scale entire application, not individual features",
+        "Tight coupling: Changes to one module may affect others",
+        "Limited technology flexibility: Same tech stack for all modules",
+        "Deployment risk: Deploying one feature requires redeploying entire application",
+        "Single point of failure: Application crash affects all functionality"
+      ]
+    },
+    "decision_drivers": {
+      "scalability_requirements": "50-100 concurrent users, no expected high growth in near term",
+      "team_structure": "2 developers working together on all features",
+      "domain_complexity": "Simple domain with tightly coupled business logic (inventory affects orders)",
+      "deployment_frequency": "Weekly deployments are acceptable"
+    }
+  },
+  "entities": [
+    {
+      "name": "User",
+      "service": "inventory-api",
+      "description": "Application user (admin or staff)",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Unique user identifier"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "description": "User email"
+        },
+        {
+          "name": "passwordHash",
+          "type": "string",
+          "required": true,
+          "description": "Hashed password"
+        },
+        {
+          "name": "role",
+          "type": "enum",
+          "required": true,
+          "enum_values": ["admin", "staff"],
+          "description": "User role"
+        }
+      ],
+      "relationships": [],
+      "indexes": ["email"]
+    },
+    {
+      "name": "Product",
+      "service": "inventory-api",
+      "description": "Inventory product",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Product ID"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Product name"
+        },
+        {
+          "name": "stock",
+          "type": "number",
+          "required": true,
+          "min_value": 0,
+          "description": "Current stock"
+        },
+        {
+          "name": "price",
+          "type": "number",
+          "required": true,
+          "min_value": 0,
+          "description": "Unit price"
+        }
+      ],
+      "relationships": [
+        {
+          "type": "one-to-many",
+          "target_entity": "OrderItem",
+          "foreign_key": "productId",
+          "cross_service": false,
+          "description": "Product orders"
+        }
+      ],
+      "indexes": ["name"]
+    },
+    {
+      "name": "Order",
+      "service": "inventory-api",
+      "description": "Customer order",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "required": true,
+          "unique": true,
+          "description": "Order ID"
+        },
+        {
+          "name": "userId",
+          "type": "uuid",
+          "required": true,
+          "description": "User who created order"
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "required": true,
+          "enum_values": ["pending", "completed", "cancelled"],
+          "description": "Order status"
+        },
+        {
+          "name": "totalAmount",
+          "type": "number",
+          "required": true,
+          "description": "Total order amount"
+        }
+      ],
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "target_entity": "User",
+          "foreign_key": "userId",
+          "cross_service": false,
+          "description": "Order creator"
+        },
+        {
+          "type": "one-to-many",
+          "target_entity": "OrderItem",
+          "foreign_key": "orderId",
+          "cross_service": false,
+          "description": "Order items"
+        }
+      ],
+      "indexes": ["userId", "status"]
+    }
+  ],
+  "api_endpoints": [
+    {
+      "name": "Create Order",
+      "service": "inventory-api",
+      "method": "POST",
+      "endpoint": "/api/orders",
+      "authentication": "bearer",
+      "description": "Create new order with automatic inventory deduction",
+      "request": {
+        "body": {
+          "items": {
+            "type": "array",
+            "required": true,
+            "description": "Order items with product IDs and quantities"
+          }
+        }
+      },
+      "responses": [
+        {
+          "status": 201,
+          "description": "Order created",
+          "body": {
+            "id": "uuid",
+            "status": "pending",
+            "totalAmount": "number"
+          }
+        },
+        {
+          "status": 400,
+          "description": "Invalid request or insufficient stock",
+          "body": {
+            "error": "string"
+          }
+        }
+      ],
+      "inter_service_calls": []
+    }
+  ],
+  "deployment": {
+    "container_orchestration": "Docker Compose",
+    "services": [
+      {
+        "name": "inventory-api",
+        "replicas": 1,
+        "resources": {
+          "cpu": "1000m",
+          "memory": "1Gi"
+        },
+        "health_check": "/health",
+        "auto_scaling": {
+          "min": 1,
+          "max": 3,
+          "target_cpu": "80%"
+        }
+      }
+    ],
+    "infrastructure": {
+      "load_balancer": "NGINX (if multiple instances)",
+      "service_mesh": "Not required",
+      "monitoring": "Simple logging + PM2 monitoring",
+      "logging": "Winston + file rotation"
+    }
+  },
+  "acceptance_criteria": [
+    "API handles 100 concurrent users with < 500ms response time",
+    "All operations use database transactions for data consistency",
+    "Deployment takes < 5 minutes",
+    "Single command deployment (docker-compose up)",
+    "All features accessible through single API endpoint",
+    "Order creation atomically updates inventory in same transaction"
+  ],
+  "ai_guidance": {
+    "architecture": "Monolithic architecture is appropriate for this small-scale application. Focus on clean module separation within the monolith to allow future extraction to microservices if needed.",
+    "validation": "Use Zod for request validation. Validate all inputs at API layer before processing.",
+    "error_handling": "Use consistent error format. Leverage database transactions for rollback on errors.",
+    "security": "JWT authentication with role-based access control. Hash passwords with bcrypt.",
+    "performance": "Use database indexes. Connection pooling for database. Consider Redis for session management if needed.",
+    "testing": "Focus on integration tests that test entire API flows. Use database transactions to rollback test data."
+  },
+  "metadata": {
+    "spec_version": "1.0.0",
+    "generated_by": "vibespec-cli v6.1.1",
+    "generated_at": "2025-11-04T10:35:00.000Z",
+    "input_hash": "def456",
+    "processing": {
+      "provider": "openrouter",
+      "model": "anthropic/claude-3.5-sonnet",
+      "heuristic_confidence": 0.90,
+      "ai_refinement_applied": true,
+      "cache_hit": false,
+      "refinement_method": "ai"
+    }
+  }
+}
